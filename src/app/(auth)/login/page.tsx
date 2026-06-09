@@ -3,12 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import '@/components/auth.css'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -16,80 +17,56 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
-    if (error) {
-      setError('Correo o contraseña incorrectos')
-      setLoading(false)
-      return
-    }
-
+    setLoading(true)
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password })
+    if (error) { setError('Correo o contrasena incorrectos'); setLoading(false); return }
     router.push('/dashboard')
     router.refresh()
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white p-8 rounded-xl shadow-sm border w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Iniciar sesión</h1>
-          <p className="text-gray-500 mt-1 text-sm">Accede al panel de tu negocio</p>
+    <div className="auth-root">
+      <div className="auth-left">
+        <div className="auth-brand">
+          <div className="auth-brand-icon">M</div>
+          <h1 className="auth-brand-name">MagicBee</h1>
+          <p className="auth-brand-tagline">Bienvenido de vuelta. Tu negocio te espera.</p>
+          <ul className="auth-features">
+            <li className="auth-feature-item"><span className="auth-feature-dot"></span>Ver citas de hoy</li>
+            <li className="auth-feature-item"><span className="auth-feature-dot"></span>Gestionar tu agenda</li>
+            <li className="auth-feature-item"><span className="auth-feature-dot"></span>Ver estadisticas</li>
+            <li className="auth-feature-item"><span className="auth-feature-dot"></span>Administrar clientes</li>
+          </ul>
         </div>
-
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Correo electrónico
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
-              placeholder="tu@correo.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {error && (
-            <p className="text-red-500 text-sm">{error}</p>
-          )}
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full"
-          >
-            {loading ? 'Ingresando...' : 'Ingresar'}
-          </Button>
-        </form>
-
-        <p className="text-center text-sm text-gray-500 mt-6">
-          ¿No tienes cuenta?{' '}
-          <Link href="/register" className="text-black font-medium hover:underline">
-            Regístrate
-          </Link>
-        </p>
+      </div>
+      <div className="auth-right">
+        <div className="auth-card">
+          <h2 className="auth-card-title">Iniciar sesion</h2>
+          <p className="auth-card-subtitle">Accede al panel de tu negocio</p>
+          <form className="auth-form" onSubmit={handleLogin}>
+            <div className="auth-field">
+              <label>Correo electronico</label>
+              <input className="auth-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="tu@correo.com" />
+            </div>
+            <div className="auth-field">
+              <label>Contrasena</label>
+              <div className="auth-input-wrap">
+                <input className="auth-input" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Tu contrasena" style={{ paddingRight: 44 }} />
+                <button type="button" className="auth-eye" onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? (
+                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  ) : (
+                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  )}
+                </button>
+              </div>
+            </div>
+            {error && <div className="auth-error">{error}</div>}
+            <button className="auth-btn" type="submit" disabled={loading}>{loading ? 'Ingresando...' : 'Ingresar'}</button>
+          </form>
+          <p className="auth-link">No tienes cuenta? <Link href="/register">Registrate gratis</Link></p>
+        </div>
       </div>
     </div>
   )
