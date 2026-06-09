@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import '@/components/auth.css'
@@ -17,36 +17,61 @@ export default function ResetPasswordPage() {
   const [ready, setReady] = useState(false)
   const [checking, setChecking] = useState(true)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
 
   useEffect(() => {
-    // El token viene en el hash: #access_token=...&type=recovery
-    // Supabase client lo detecta automáticamente via onAuthStateChange
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'PASSWORD_RECOVERY' && session) {
+    const init = async () => {
+      // Caso 1: error explícito en la URL (link expirado o ya usado)
+      const errorCode = searchParams.get('error_code')
+      if (errorCode) {
+        setChecking(false)
+        setReady(false)
+        return
+      }
+
+      // Caso 2: viene un code en query param (flujo PKCE)
+      const code = searchParams.get('code')
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        if (error) {
+          setChecking(false)
+          setReady(false)
+          return
+        }
+        setReady(true)
+        setChecking(false)
+        return
+      }
+
+      // Caso 3: token en el hash (flujo implícito) — lo procesa el cliente
+      const hash = window.location.hash
+      if (hash && hash.includes('access_token')) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
           setReady(true)
           setChecking(false)
-        } else if (event === 'SIGNED_IN' && session) {
-          // También funciona si ya procesó el token
-          const hash = window.location.hash
-          if (hash.includes('type=recovery')) {
-            setReady(true)
-            setChecking(false)
-          }
+          return
         }
       }
-    )
 
-    // Timeout: si en 5s no llega el evento, el link es inválido
-    const timeout = setTimeout(() => {
-      setChecking(false)
-    }, 5000)
+      // Esperar evento PASSWORD_RECOVERY como respaldo
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          setReady(true)
+          setChecking(false)
+        }
+      })
 
-    return () => {
-      subscription.unsubscribe()
-      clearTimeout(timeout)
+      // Timeout de seguridad
+      setTimeout(() => {
+        setChecking(false)
+      }, 4000)
+
+      return () => subscription.unsubscribe()
     }
+
+    init()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,7 +82,7 @@ export default function ResetPasswordPage() {
     if (password !== confirm) { setError('Las contraseñas no coinciden'); return }
     setLoading(true)
     const { error } = await supabase.auth.updateUser({ password })
-    if (error) { setError('Error al actualizar. El enlace puede haber expirado.'); setLoading(false); return }
+    if (error) { setError('Error al actualizar la contraseña.'); setLoading(false); return }
     setDone(true)
     setLoading(false)
     setTimeout(() => router.push('/login'), 3000)
@@ -84,9 +109,7 @@ export default function ResetPasswordPage() {
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
               <h2 className="auth-card-title">Contraseña actualizada</h2>
-              <p className="auth-card-subtitle">
-                Tu contraseña fue cambiada. Redirigiendo al login...
-              </p>
+              <p className="auth-card-subtitle">Tu contraseña fue cambiada. Redirigiendo al login...</p>
             </div>
           ) : checking ? (
             <div style={{ textAlign: 'center' }}>
@@ -97,12 +120,9 @@ export default function ResetPasswordPage() {
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
               <h2 className="auth-card-title">Enlace inválido o expirado</h2>
-              <p className="auth-card-subtitle">
-                Este enlace ya fue usado o expiró.
-              </p>
+              <p className="auth-card-subtitle">Este enlace ya fue usado o expiró.</p>
               <Link href="/forgot-password" className="auth-btn" style={{
-                display: 'block', textAlign: 'center',
-                textDecoration: 'none', marginTop: 24
+                display: 'block', textAlign: 'center', textDecoration: 'none', marginTop: 24
               }}>
                 Solicitar nuevo enlace
               </Link>
