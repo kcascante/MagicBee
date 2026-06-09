@@ -279,3 +279,257 @@
   transform: translateY(-2px);
   box-shadow: 0 8px 28px rgba(245,166,35,0.45);
 }
+
+/* LIGHT THEME - Neumorphism */
+[data-theme="light"] .db-root {
+  background: #f0f0f3;
+  color: #1a1a2e;
+}
+
+[data-theme="light"] .db-sidebar {
+  background: #f0f0f3;
+  border-right: 1px solid #d1d1d4;
+}
+
+[data-theme="light"] .db-logo span {
+  color: #1a1a2e;
+}
+
+[data-theme="light"] .db-org-label {
+  color: #999;
+}
+
+[data-theme="light"] .db-org-name {
+  color: #1a1a2e;
+}
+
+[data-theme="light"] .db-nav-item {
+  color: #888;
+}
+
+[data-theme="light"] .db-nav-item:hover {
+  color: #1a1a2e;
+  background: rgba(0,0,0,0.04);
+}
+
+[data-theme="light"] .db-nav-item.active {
+  color: #1a1a2e;
+  background: rgba(245,166,35,0.1);
+  border-color: rgba(245,166,35,0.25);
+}
+
+[data-theme="light"] .db-username {
+  color: #888;
+}
+
+[data-theme="light"] .db-logout {
+  background: rgba(245,99,66,0.08);
+  border-color: rgba(245,99,66,0.2);
+}
+
+[data-theme="light"] .db-header-title {
+  color: #1a1a2e;
+}
+
+[data-theme="light"] .db-header-date {
+  color: #999;
+}
+
+[data-theme="light"] .db-header.scrolled {
+  background: rgba(240,240,243,0.9);
+  border-bottom-color: #d1d1d4;
+}
+
+[data-theme="light"] .db-card {
+  background: #f0f0f3;
+  border-color: transparent;
+  box-shadow: 6px 6px 12px #d1d1d4, -4px -4px 10px #ffffff;
+}
+
+[data-theme="light"] .db-card:hover {
+  box-shadow: 8px 8px 16px #d1d1d4, -4px -4px 10px #ffffff;
+  border-color: transparent;
+}
+
+[data-theme="light"] .db-card-label {
+  color: #999;
+}
+
+[data-theme="light"] .db-card-value {
+  color: #1a1a2e;
+}
+
+[data-theme="light"] .db-actions-label {
+  color: #999;
+}
+
+[data-theme="light"] .db-action-btn {
+  background: #f0f0f3;
+  box-shadow: 3px 3px 6px #d1d1d4, -2px -2px 5px #ffffff;
+}
+
+[data-theme="light"] .db-action-btn:hover {
+  box-shadow: 4px 4px 8px #d1d1d4, -2px -2px 5px #ffffff;
+}
+
+[data-theme="light"] .db-empty {
+  background: #f0f0f3;
+  border-color: transparent;
+  box-shadow: 6px 6px 12px #d1d1d4, -4px -4px 10px #ffffff;
+}
+
+[data-theme="light"] .db-empty-title {
+  color: #1a1a2e;
+}
+
+[data-theme="light"] .db-empty-subtitle {
+  color: #999;
+}
+
+[data-theme="dark"] .db-sidebar,
+.db-sidebar {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+.db-card {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.db-card:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.18);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  transform: translateY(-3px);
+}
+
+.db-empty {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.db-action-btn {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.db-action-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.db-header.scrolled {
+  background: rgba(10,10,15,0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.db-root {
+  background: radial-gradient(ellipse at 20% 50%, rgba(124,106,247,0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 20%, rgba(245,166,35,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 60% 80%, rgba(34,211,165,0.05) 0%, transparent 50%),
+              #0a0a0f;
+}
+
+/* Strong glassmorphism background orbs for dashboard */
+.db-root {
+  position: relative;
+  overflow-x: hidden;
+}
+
+.db-root::before {
+  content: '';
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(124,106,247,0.2) 0%, rgba(180,100,255,0.1) 30%, transparent 60%);
+  top: -200px;
+  right: 100px;
+  border-radius: 50%;
+  animation: dorb1 10s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.db-root::after {
+  content: '';
+  position: fixed;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(245,140,35,0.18) 0%, rgba(245,80,80,0.1) 30%, transparent 60%);
+  bottom: -150px;
+  left: 250px;
+  border-radius: 50%;
+  animation: dorb2 12s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes dorb1 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-60px, 80px) scale(1.15); }
+}
+
+@keyframes dorb2 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(80px, -60px) scale(1.2); }
+}
+
+.db-sidebar {
+  position: fixed;
+  z-index: 10;
+  background: rgba(255,255,255,0.04) !important;
+  backdrop-filter: blur(32px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
+  border-right: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+.db-main {
+  position: relative;
+  z-index: 1;
+}
+
+.db-card {
+  background: rgba(20,15,40,0.35) !important;
+  backdrop-filter: blur(32px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  border-top: 1px solid rgba(255,255,255,0.25) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15) !important;
+}
+
+.db-card:hover {
+  background: rgba(30,20,55,0.4) !important;
+  border-color: rgba(255,255,255,0.22) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+  transform: translateY(-3px) !important;
+}
+
+.db-empty {
+  background: rgba(20,15,40,0.3) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-top: 1px solid rgba(255,255,255,0.2) !important;
+}
+
+.db-action-btn {
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.db-header.scrolled {
+  backdrop-filter: blur(32px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
+  background: rgba(10,10,15,0.6) !important;
+}

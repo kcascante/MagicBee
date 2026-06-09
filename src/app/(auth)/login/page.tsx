@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import '@/components/auth.css'
+import { MagicBeeLogo } from '@/components/ThemeSwitch'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -29,8 +30,8 @@ export default function LoginPage() {
     <div className="auth-root">
       <div className="auth-left">
         <div className="auth-brand">
-          <div className="auth-brand-icon">M</div>
-          <h1 className="auth-brand-name">MagicBee</h1>
+          <MagicBeeLogo size={72} />
+          <h1 className="auth-brand-name" style={{ marginTop: 24 }}>MagicBee</h1>
           <p className="auth-brand-tagline">Bienvenido de vuelta. Tu negocio te espera.</p>
           <ul className="auth-features">
             <li className="auth-feature-item"><span className="auth-feature-dot"></span>Ver citas de hoy</li>
