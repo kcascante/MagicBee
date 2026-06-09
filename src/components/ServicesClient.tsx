@@ -23,7 +23,7 @@ type Service = {
   description: string | null
   duration_minutes: number
   price: number
-  active: boolean
+  is_active: boolean
   created_at: string
 }
 
@@ -146,7 +146,7 @@ export default function ServicesClient({
   const toggleActive = async (service: Service) => {
     const { data, error: updateError } = await supabase
       .from('services')
-      .update({ active: !service.active })
+      .update({ is_active: !service.is_active })
       .eq('id', service.id)
       .select()
       .single()
@@ -219,14 +219,14 @@ export default function ServicesClient({
         ) : (
           <div className="svc-grid">
             {services.map((service) => (
-              <div key={service.id} className={"svc-card" + (service.active ? "" : " inactive")}>
+              <div key={service.id} className={"svc-card" + (service.is_active ? "" : " inactive")}>
                 <div className="svc-card-top">
                   <div>
                     <h3 className="svc-card-name">{service.name}</h3>
                     {service.description && <p className="svc-card-desc">{service.description}</p>}
                   </div>
-                  <span className={"svc-badge" + (service.active ? " active" : " inactive")}>
-                    {service.active ? 'Activo' : 'Inactivo'}
+                  <span className={"svc-badge" + (service.is_active ? " active" : " inactive")}>
+                    {service.is_active ? 'Activo' : 'Inactivo'}
                   </span>
                 </div>
                 <div className="svc-card-meta">
@@ -244,7 +244,7 @@ export default function ServicesClient({
                     Editar
                   </button>
                   <button className="db-action-btn" style={{ color: '#22d3a5', border: '1px solid rgba(34,211,165,0.3)' }} onClick={() => toggleActive(service)}>
-                    {service.active ? 'Desactivar' : 'Activar'}
+                    {service.is_active ? 'Desactivar' : 'Activar'}
                   </button>
                   <button className="db-action-btn" style={{ color: '#f56342', border: '1px solid rgba(245,99,66,0.3)' }} onClick={() => deleteService(service.id)}>
                     Eliminar
