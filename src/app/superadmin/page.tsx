@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import '@/components/superadmin.css'
+import SuperadminLogout from '@/components/SuperadminLogout'
 
 export default async function SuperadminPage() {
   const supabase = await createClient()
@@ -39,6 +40,7 @@ export default async function SuperadminPage() {
           </div>
           <h1 className="sa-title">Panel Global</h1>
           <p className="sa-subtitle">Bienvenido, {userData?.full_name}</p>
+          <SuperadminLogout />
         </div>
 
         <div className="sa-metrics">

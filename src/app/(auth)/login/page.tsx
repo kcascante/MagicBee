@@ -7,12 +7,11 @@ import Link from 'next/link'
 import '@/components/auth.css'
 import { MagicBeeLogo } from '@/components/ThemeSwitch'
 
-// Sanitiza texto: elimina caracteres de control, scripts y SQL básico
 function sanitizeText(value: string): string {
   return value
-    .replace(/[<>'"`;]/g, '')                        // XSS / SQL básico
-    .replace(/(\b)(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|OR|AND)\b/gi, '') // SQL keywords
-    .replace(/[\x00-\x1F\x7F]/g, '')                 // caracteres de control
+    .replace(/[<>'"`;]/g, '')
+    .replace(/(\b)(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|OR|AND)\b/gi, '')
+    .replace(/[\x00-\x1F\x7F]/g, '')
     .trim()
 }
 
@@ -54,18 +53,18 @@ export default function LoginPage() {
           <ul className="auth-features">
             <li className="auth-feature-item"><span className="auth-feature-dot"></span>Ver citas de hoy</li>
             <li className="auth-feature-item"><span className="auth-feature-dot"></span>Gestionar tu agenda</li>
-            <li className="auth-feature-item"><span className="auth-feature-dot"></span>Ver estadisticas</li>
+            <li className="auth-feature-item"><span className="auth-feature-dot"></span>Ver estadísticas</li>
             <li className="auth-feature-item"><span className="auth-feature-dot"></span>Administrar clientes</li>
           </ul>
         </div>
       </div>
       <div className="auth-right">
         <div className="auth-card">
-          <h2 className="auth-card-title">Iniciar sesion</h2>
+          <h2 className="auth-card-title">Iniciar sesión</h2>
           <p className="auth-card-subtitle">Accede al panel de tu negocio</p>
           <form className="auth-form" onSubmit={handleLogin} autoComplete="off">
             <div className="auth-field">
-              <label>Correo electronico</label>
+              <label>Correo electrónico</label>
               <input
                 className="auth-input"
                 type="email"
@@ -80,7 +79,7 @@ export default function LoginPage() {
               />
             </div>
             <div className="auth-field">
-              <label>Contrasena</label>
+              <label>Contraseña</label>
               <div className="auth-input-wrap">
                 <input
                   className="auth-input"
@@ -88,7 +87,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="Tu contrasena"
+                  placeholder="Tu contraseña"
                   style={{ paddingRight: 44 }}
                   maxLength={128}
                   autoComplete="current-password"
@@ -102,10 +101,19 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
+            <div style={{ textAlign: 'right', marginTop: -8 }}>
+              <Link href="/forgot-password" 
+                
+                className="auth-forgot">
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
             {error && <div className="auth-error" role="alert">{error}</div>}
-            <button className="auth-btn" type="submit" disabled={loading}>{loading ? 'Ingresando...' : 'Ingresar'}</button>
+            <button className="auth-btn" type="submit" disabled={loading}>
+              {loading ? 'Ingresando...' : 'Ingresar'}
+            </button>
           </form>
-          <p className="auth-link">No tienes cuenta? <Link href="/register">Registrate gratis</Link></p>
+          <p className="auth-link">¿No tienes cuenta? <Link href="/register">Regístrate gratis</Link></p>
         </div>
       </div>
     </div>

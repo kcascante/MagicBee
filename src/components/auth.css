@@ -580,3 +580,23 @@
   -webkit-text-fill-color: #bbbbc8 !important;
   opacity: 1 !important;
 }
+
+/* ── Link olvidé contraseña ── */
+.auth-forgot {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.auth-forgot:hover {
+  color: #f5a623;
+}
+
+[data-theme="light"] .auth-forgot {
+  color: #aaa;
+}
+
+[data-theme="light"] .auth-forgot:hover {
+  color: #f5a623;
+}
