@@ -12,7 +12,7 @@ function sanitizeText(value: string): string {
 }
 
 function sanitizeCode(value: string): string {
-  return value.replace(/\D/g, '').slice(0, 6)
+  return value.replace(/\D/g, '').slice(0, 8)
 }
 
 type Step = 'email' | 'verify' | 'done'
@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     setError('')
     const cleanCode = sanitizeCode(code)
-    if (cleanCode.length !== 6) { setError('El código debe tener 6 dígitos'); return }
+    if (cleanCode.length !== 8) { setError('El código debe tener 8 dígitos'); return }
     if (password.length < 8) { setError('La contraseña debe tener al menos 8 caracteres'); return }
     if (password.length > 128) { setError('La contraseña es demasiado larga'); return }
     if (password !== confirm) { setError('Las contraseñas no coinciden'); return }
@@ -113,7 +113,7 @@ export default function ForgotPasswordPage() {
             <>
               <h2 className="auth-card-title">Ingresá el código</h2>
               <p className="auth-card-subtitle">
-                Enviamos un código de 6 dígitos a <strong style={{ color: '#f5a623' }}>{email}</strong>.
+                Enviamos un código de 8 dígitos a <strong style={{ color: '#f5a623' }}>{email}</strong>.
                 Ingresalo junto con tu nueva contraseña.
               </p>
               <form className="auth-form" onSubmit={handleVerifyAndReset} autoComplete="off">
@@ -126,8 +126,8 @@ export default function ForgotPasswordPage() {
                     value={code}
                     onChange={(e) => setCode(sanitizeCode(e.target.value))}
                     required
-                    placeholder="123456"
-                    maxLength={6}
+                    placeholder="12345678"
+                    maxLength={8}
                     autoComplete="one-time-code"
                     style={{ letterSpacing: '0.4em', fontSize: 20, textAlign: 'center', fontWeight: 600 }}
                   />
