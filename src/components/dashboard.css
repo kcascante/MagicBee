@@ -564,3 +564,10 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Header flexible para páginas con acción (ej. Servicios) */
+.db-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

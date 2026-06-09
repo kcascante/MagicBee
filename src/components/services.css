@@ -1,0 +1,224 @@
+/* ═══════════════ SERVICIOS — GRID Y CARDS ═══════════════ */
+
+.svc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.svc-card {
+  background: rgba(20,15,40,0.35);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-top: 1px solid rgba(255,255,255,0.25);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  padding: 24px;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.svc-card:hover {
+  transform: translateY(-3px);
+}
+
+.svc-card.inactive {
+  opacity: 0.55;
+}
+
+[data-theme="light"] .svc-card {
+  background: #e8e8ec !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-top: none !important;
+  box-shadow: 6px 6px 14px #c8c8cc, -5px -5px 12px #ffffff !important;
+}
+
+[data-theme="light"] .svc-card:hover {
+  box-shadow: 9px 9px 18px #c0c0c4, -6px -6px 14px #ffffff !important;
+}
+
+.svc-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.svc-card-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.svc-card-desc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  margin: 0;
+  line-height: 1.5;
+}
+
+[data-theme="light"] .svc-card-desc {
+  color: #999;
+}
+
+.svc-badge {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.svc-badge.active {
+  color: #22d3a5;
+  background: rgba(34,211,165,0.12);
+  border: 1px solid rgba(34,211,165,0.25);
+}
+
+.svc-badge.inactive {
+  color: #888888;
+  background: rgba(136,136,136,0.12);
+  border: 1px solid rgba(136,136,136,0.25);
+}
+
+.svc-card-meta {
+  display: flex;
+  gap: 24px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+[data-theme="light"] .svc-card-meta {
+  border-top: 1px solid #d0d0d5;
+  border-bottom: 1px solid #d0d0d5;
+}
+
+.svc-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.svc-meta-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.4);
+}
+
+[data-theme="light"] .svc-meta-label {
+  color: #999;
+}
+
+.svc-meta-value {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.svc-meta-value.price {
+  color: #f5a623;
+}
+
+.svc-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.svc-card-actions .db-action-btn {
+  flex: 1;
+  text-align: center;
+  min-width: 90px;
+}
+
+/* ═══════════════ MODAL DE FORMULARIO ═══════════════ */
+
+.svc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 20px;
+}
+
+.svc-modal {
+  background: rgba(20,15,40,0.85);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-top: 1px solid rgba(255,255,255,0.25);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+  padding: 32px;
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+[data-theme="light"] .svc-modal {
+  background: #e8e8ec !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-top: none !important;
+  box-shadow: 9px 9px 18px #c0c0c4, -6px -6px 14px #ffffff !important;
+}
+
+.svc-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.svc-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* ═══════════════ RESPONSIVE ═══════════════ */
+
+@media (max-width: 880px) {
+  .db-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .db-header .db-cta {
+    width: 100%;
+    text-align: center;
+  }
+
+  .svc-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .svc-card-actions .db-action-btn {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .svc-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .svc-modal {
+    padding: 24px 20px;
+  }
+}
