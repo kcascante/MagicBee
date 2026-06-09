@@ -7,6 +7,15 @@ import Link from 'next/link'
 import '@/components/auth.css'
 import { MagicBeeLogo } from '@/components/ThemeSwitch'
 
+// Sanitiza texto: elimina caracteres de control, scripts y SQL básico
+function sanitizeText(value: string): string {
+  return value
+    .replace(/[<>'"`;]/g, '')                        // XSS / SQL básico
+    .replace(/(\b)(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|OR|AND)\b/gi, '') // SQL keywords
+    .replace(/[\x00-\x1F\x7F]/g, '')                 // caracteres de control
+    .trim()
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -20,8 +29,17 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password })
-    if (error) { setError('Correo o contrasena incorrectos'); setLoading(false); return }
+
+    const cleanEmail = sanitizeText(email).toLowerCase()
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(cleanEmail)) {
+      setError('Correo electrónico no válido')
+      setLoading(false)
+      return
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password })
+    if (error) { setError('Correo o contraseña incorrectos'); setLoading(false); return }
     router.push('/dashboard')
     router.refresh()
   }
@@ -45,15 +63,36 @@ export default function LoginPage() {
         <div className="auth-card">
           <h2 className="auth-card-title">Iniciar sesion</h2>
           <p className="auth-card-subtitle">Accede al panel de tu negocio</p>
-          <form className="auth-form" onSubmit={handleLogin}>
+          <form className="auth-form" onSubmit={handleLogin} autoComplete="off">
             <div className="auth-field">
               <label>Correo electronico</label>
-              <input className="auth-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="tu@correo.com" />
+              <input
+                className="auth-input"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="tu@correo.com"
+                maxLength={254}
+                autoComplete="email"
+                spellCheck={false}
+                inputMode="email"
+              />
             </div>
             <div className="auth-field">
               <label>Contrasena</label>
               <div className="auth-input-wrap">
-                <input className="auth-input" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Tu contrasena" style={{ paddingRight: 44 }} />
+                <input
+                  className="auth-input"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="Tu contrasena"
+                  style={{ paddingRight: 44 }}
+                  maxLength={128}
+                  autoComplete="current-password"
+                />
                 <button type="button" className="auth-eye" onClick={() => setShowPassword(!showPassword)}>
                   {showPassword ? (
                     <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
@@ -63,7 +102,7 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
-            {error && <div className="auth-error">{error}</div>}
+            {error && <div className="auth-error" role="alert">{error}</div>}
             <button className="auth-btn" type="submit" disabled={loading}>{loading ? 'Ingresando...' : 'Ingresar'}</button>
           </form>
           <p className="auth-link">No tienes cuenta? <Link href="/register">Registrate gratis</Link></p>

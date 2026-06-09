@@ -1,31 +1,52 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
+// Sanitización del lado del servidor
+function sanitizeText(value: string): string {
+  return value
+    .replace(/[<>'"`;]/g, '')
+    .replace(/(\b)(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|EXEC|SCRIPT)\b/gi, '')
+    .replace(/[\x00-\x1F\x7F]/g, '')
+    .trim()
+}
+
+function sanitizeName(value: string): string {
+  return value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s\-']/g, '').trim()
+}
+
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { orgName, firstName, lastName, email, password } = body
+    const { orgName: rawOrg, firstName: rawFirst, lastName: rawLast, email: rawEmail, password } = body
+
+    // Sanitizar entradas del servidor
+    const orgName = sanitizeText(String(rawOrg ?? ''))
+    const firstName = sanitizeName(String(rawFirst ?? ''))
+    const lastName = sanitizeName(String(rawLast ?? ''))
+    const email = sanitizeText(String(rawEmail ?? '')).toLowerCase()
 
     // Validación del lado del servidor
-    if (!orgName || orgName.trim().length < 2) {
-      return NextResponse.json({ error: 'El nombre del negocio debe tener al menos 2 caracteres' }, { status: 400 })
+    if (!orgName || orgName.length < 2 || orgName.length > 100) {
+      return NextResponse.json({ error: 'El nombre del negocio debe tener entre 2 y 100 caracteres' }, { status: 400 })
     }
-    if (!firstName || firstName.trim().length < 2) {
-      return NextResponse.json({ error: 'El nombre debe tener al menos 2 caracteres' }, { status: 400 })
+    if (!firstName || firstName.length < 2 || firstName.length > 50) {
+      return NextResponse.json({ error: 'El nombre debe tener entre 2 y 50 caracteres' }, { status: 400 })
     }
-    if (!lastName || lastName.trim().length < 2) {
-      return NextResponse.json({ error: 'Los apellidos deben tener al menos 2 caracteres' }, { status: 400 })
+    if (!lastName || lastName.length < 2 || lastName.length > 50) {
+      return NextResponse.json({ error: 'Los apellidos deben tener entre 2 y 50 caracteres' }, { status: 400 })
     }
-    if (!email || !email.includes('@') || !email.includes('.')) {
+    if (!email || !EMAIL_REGEX.test(email) || email.length > 254) {
       return NextResponse.json({ error: 'El correo electrónico no es válido' }, { status: 400 })
     }
-    if (!password || password.length < 8) {
-      return NextResponse.json({ error: 'La contraseña debe tener al menos 8 caracteres' }, { status: 400 })
+    if (!password || typeof password !== 'string' || password.length < 8 || password.length > 128) {
+      return NextResponse.json({ error: 'La contraseña debe tener entre 8 y 128 caracteres' }, { status: 400 })
     }
 
     const supabase = createAdminClient()
-    const cleanEmail = email.trim().toLowerCase()
-    const fullName = `${firstName.trim()} ${lastName.trim()}`
+    const cleanEmail = email
+    const fullName = `${firstName} ${lastName}`
     const slug = orgName
       .toLowerCase()
       .normalize('NFD')
@@ -56,12 +77,11 @@ export async function POST(request: Request) {
     // Paso 2: Crear organización
     const { data: org, error: orgError } = await supabase
       .from('organizations')
-      .insert({ name: orgName.trim(), slug })
+      .insert({ name: orgName, slug })
       .select()
       .single()
 
     if (orgError) {
-      // Rollback: borrar el usuario si falla la organización
       await supabase.auth.admin.deleteUser(authData.user.id)
       return NextResponse.json({ error: `Error al crear el negocio: ${orgError.message}` }, { status: 400 })
     }
@@ -78,7 +98,6 @@ export async function POST(request: Request) {
       })
 
     if (userError) {
-      // Rollback
       await supabase.auth.admin.deleteUser(authData.user.id)
       await supabase.from('organizations').delete().eq('id', org.id)
       return NextResponse.json({ error: `Error al crear el perfil: ${userError.message}` }, { status: 400 })
