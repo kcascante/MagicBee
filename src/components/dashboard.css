@@ -453,3 +453,114 @@
 
 [data-theme="light"] .db-empty-title    { color: #1a1a2e !important; }
 [data-theme="light"] .db-empty-subtitle { color: #888 !important; }
+
+/* ═══════════════ RESPONSIVE — MOBILE ═══════════════ */
+
+.db-mobile-toggle {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 30;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(20,15,40,0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: #fff;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+[data-theme="light"] .db-mobile-toggle {
+  background: #e8e8ec !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  color: #1a1a2e;
+  box-shadow: 4px 4px 8px #c8c8cc, -3px -3px 7px #ffffff !important;
+}
+
+.db-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 15;
+}
+
+@media (max-width: 880px) {
+  .db-mobile-toggle { display: flex; }
+  .db-overlay.db-overlay { display: block; }
+
+  .db-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 20;
+    width: 240px;
+  }
+
+  .db-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .db-main {
+    margin-left: 0;
+    padding: 24px 16px;
+    padding-top: 72px;
+  }
+
+  .db-header {
+    margin: -24px -16px 24px;
+    padding: 16px 16px 16px 64px;
+  }
+
+  .db-header.scrolled {
+    padding-left: 64px;
+  }
+
+  .db-header-title {
+    font-size: 18px;
+  }
+
+  .db-metrics {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .db-card {
+    padding: 18px 16px;
+  }
+
+  .db-card-value {
+    font-size: 26px;
+  }
+
+  .db-card-label {
+    font-size: 10px;
+  }
+
+  .db-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .db-action-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .db-empty {
+    padding: 32px 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  .db-metrics {
+    grid-template-columns: 1fr;
+  }
+}

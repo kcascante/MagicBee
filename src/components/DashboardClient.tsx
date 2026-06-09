@@ -42,21 +42,45 @@ export default function DashboardClient({ userData }: { userData: UserData | nul
   const router = useRouter()
   const supabase = createClient()
   const [scrolled, setScrolled] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', fn)
     return () => window.removeEventListener('scroll', fn)
   }, [])
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [menuOpen])
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push('/register')
     router.refresh()
   }
+
   const orgName = userData?.organizations?.name ?? 'Tu negocio'
   const firstName = userData?.full_name?.split(' ')[0] ?? 'Admin'
+
   return (
     <div className="db-root">
-      <aside className="db-sidebar">
+      {menuOpen && <div className="db-overlay" onClick={() => setMenuOpen(false)} />}
+
+      <button
+        className="db-mobile-toggle"
+        onClick={() => setMenuOpen(!menuOpen)}
+        aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+      >
+        {menuOpen ? (
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        ) : (
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        )}
+      </button>
+
+      <aside className={"db-sidebar" + (menuOpen ? " open" : "")}>
         <div className="db-logo">
           <div className="db-logo-icon">M</div>
           <span style={{ fontWeight: 600, fontSize: 15 }}>MagicBee</span>
@@ -66,13 +90,18 @@ export default function DashboardClient({ userData }: { userData: UserData | nul
           <p className="db-org-name">{orgName}</p>
         </div>
         <nav className="db-nav">
-          {NAV.map((item) => <a key={item.label} href={item.href} className={"db-nav-item" + (item.active ? " active" : "")}>{item.label}</a>)}
+          {NAV.map((item) => (
+            <a key={item.label} href={item.href} className={"db-nav-item" + (item.active ? " active" : "")} onClick={() => setMenuOpen(false)}>
+              {item.label}
+            </a>
+          ))}
         </nav>
         <div className="db-user">
           <p className="db-username">{firstName}</p>
           <button className="db-logout" onClick={handleLogout}>Cerrar sesión</button>
         </div>
       </aside>
+
       <main className="db-main">
         <div className={"db-header" + (scrolled ? " scrolled" : "")}>
           <h1 className="db-header-title">Bienvenido, {firstName}</h1>

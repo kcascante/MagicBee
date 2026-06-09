@@ -155,3 +155,49 @@
 [data-theme="light"] .sa-td-mono,
 [data-theme="light"] .sa-td-date { color: #888; }
 [data-theme="light"] .sa-empty { color: #888; }
+
+/* ═══════════════ RESPONSIVE — MOBILE ═══════════════ */
+
+@media (max-width: 880px) {
+  .sa-root {
+    padding: 20px 16px;
+  }
+
+  .sa-title {
+    font-size: 18px;
+  }
+
+  .sa-metrics {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .sa-card {
+    padding: 18px 16px;
+  }
+
+  .sa-card-value {
+    font-size: 26px;
+  }
+
+  .sa-card-label {
+    font-size: 10px;
+  }
+
+  .sa-panel {
+    padding: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sa-table {
+    min-width: 480px;
+  }
+}
+
+@media (max-width: 420px) {
+  .sa-metrics {
+    grid-template-columns: 1fr;
+  }
+}
