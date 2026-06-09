@@ -82,7 +82,16 @@ export default function ResetPasswordPage() {
     if (password !== confirm) { setError('Las contraseñas no coinciden'); return }
     setLoading(true)
     const { error } = await supabase.auth.updateUser({ password })
-    if (error) { setError('Error al actualizar la contraseña.'); setLoading(false); return }
+    if (error) {
+      if (error.message.toLowerCase().includes('should be different') ||
+          error.message.toLowerCase().includes('same')) {
+        setError('La nueva contraseña debe ser diferente a la anterior.')
+      } else {
+        setError('Error al actualizar la contraseña. Intentá de nuevo.')
+      }
+      setLoading(false)
+      return
+    }
     setDone(true)
     setLoading(false)
     setTimeout(() => router.push('/login'), 3000)
