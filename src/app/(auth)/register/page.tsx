@@ -20,85 +20,49 @@ export default function RegisterPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
 
     if (password.length < 8) {
       setError('La contraseña debe tener al menos 8 caracteres')
-      setLoading(false)
       return
     }
 
-    const fullName = `${firstName.trim()} ${lastName.trim()}`
-    const slug = orgName
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '')
+    setLoading(true)
 
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName }
-      }
+    // Paso 1: Crear la cuenta vía API Route (servidor, sin rate limit)
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orgName, firstName, lastName, email, password }),
     })
 
-    if (authError) {
-      if (authError.message.includes('seconds') || authError.message.includes('rate')) {
-        setError('Demasiados intentos. Por favor espera unos minutos e intenta de nuevo.')
-      } else if (authError.message.includes('already registered') || authError.message.includes('already been registered')) {
-        setError('Este correo ya está registrado. ¿Quieres iniciar sesión?')
-      } else if (authError.message.includes('invalid') && authError.message.includes('email')) {
-        setError('El correo electrónico no es válido.')
-      } else if (authError.message.includes('password')) {
-        setError('La contraseña no cumple los requisitos mínimos de seguridad.')
-      } else {
-        setError(`Error: ${authError.message}`)
-      }
+    const data = await res.json()
+
+    if (!res.ok) {
+      setError(data.error || 'Error al crear la cuenta')
       setLoading(false)
       return
     }
 
-    if (authData.user) {
-      const { data: org, error: orgError } = await supabase
-        .from('organizations')
-        .insert({ name: orgName, slug })
-        .select()
-        .single()
+    // Paso 2: Iniciar sesión automáticamente
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    })
 
-      if (orgError) {
-        if (orgError.message.includes('duplicate') || orgError.message.includes('unique')) {
-          setError('Ya existe un negocio con ese nombre. Por favor elige otro.')
-        } else {
-          setError(`Error al crear el negocio: ${orgError.message}`)
-        }
-        setLoading(false)
-        return
-      }
-
-      const { error: userError } = await supabase
-        .from('users')
-        .insert({
-          id: authData.user.id,
-          organization_id: org.id,
-          role: 'admin',
-          full_name: fullName,
-          email,
-        })
-
-      if (userError) {
-        setError(`Error al crear el perfil: ${userError.message}`)
-        setLoading(false)
-        return
-      }
-
-      router.push('/dashboard')
-      router.refresh()
+    if (signInError) {
+      setError('Cuenta creada. Por favor inicia sesión.')
+      setLoading(false)
+      router.push('/login')
+      return
     }
+
+    router.push('/dashboard')
+    router.refresh()
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-8">
       <div className="bg-white p-8 rounded-xl shadow-sm border w-full max-w-md">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-gray-900">Crear cuenta</h1>
@@ -115,6 +79,7 @@ export default function RegisterPage() {
               value={orgName}
               onChange={(e) => setOrgName(e.target.value)}
               required
+              maxLength={100}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
               placeholder="Barbería El Estilo"
             />
@@ -130,6 +95,7 @@ export default function RegisterPage() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
+                maxLength={50}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
                 placeholder="Juan"
               />
@@ -143,8 +109,9 @@ export default function RegisterPage() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 required
+                maxLength={50}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                placeholder="Pérez"
+                placeholder="Pérez Rodríguez"
               />
             </div>
           </div>
@@ -193,6 +160,9 @@ export default function RegisterPage() {
                 )}
               </button>
             </div>
+            <p className="text-xs text-gray-400 mt-1">
+              Mínimo 8 caracteres. Puede incluir letras, números y símbolos.
+            </p>
           </div>
 
           {error && (
