@@ -330,3 +330,11 @@
   flex: 1;
   text-align: center;
 }
+
+
+/* ===== Fix: permitir scroll interno en modales largos (citas, servicios, etc.) ===== */
+.svc-modal {
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
