@@ -168,13 +168,17 @@
   overflow-y: auto;
 }
 
+[data-theme="light"] .svc-modal-overlay {
+  background: rgba(200,200,204,0.55) !important;
+}
+
 [data-theme="light"] .svc-modal {
   background: #e8e8ec !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border: none !important;
   border-top: none !important;
-  box-shadow: 9px 9px 18px #c0c0c4, -6px -6px 14px #ffffff !important;
+  box-shadow: 12px 12px 24px #b8b8bc, -8px -8px 18px #ffffff !important;
 }
 
 .svc-form-row {
