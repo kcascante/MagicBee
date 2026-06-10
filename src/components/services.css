@@ -338,3 +338,11 @@
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
 }
+
+
+/* ===== Fix: permitir scroll del overlay cuando el modal es mas alto que la pantalla ===== */
+.svc-modal-overlay {
+  align-items: flex-start !important;
+  overflow-y: auto !important;
+  padding: 40px 20px !important;
+}
