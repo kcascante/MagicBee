@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import '@/components/auth.css'
 import './dashboard.css'
 import './appointments.css'
+import './services.css'
 
 const NAV = [
   { label: 'Panel', href: '/dashboard', active: false },
