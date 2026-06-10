@@ -70,7 +70,7 @@ export default function DashboardClient({ userData }: { userData: UserData | nul
       {menuOpen && <div className="db-overlay" onClick={() => setMenuOpen(false)} />}
 
       <button
-        className="db-mobile-toggle"
+        className={"db-mobile-toggle" + (menuOpen ? " open" : "")}
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
       >
