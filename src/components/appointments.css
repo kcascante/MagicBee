@@ -434,3 +434,8 @@
     min-width: 560px;
   }
 }
+
+/* Espacio extra antes del botón Cerrar */
+.apt-status-actions {
+  margin-bottom: 16px;
+}
