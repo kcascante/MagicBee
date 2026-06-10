@@ -273,3 +273,46 @@
 [data-theme="light"] .svc-card::before {
   display: none;
 }
+
+/* ═══════════════ GLOW PARA EL MODAL DE EDITAR/CREAR (dark) ═══════════════ */
+
+.svc-modal {
+  position: relative;
+  overflow: hidden;
+}
+
+.svc-modal::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -30%;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(245,166,35,0.25) 0%, rgba(245,99,66,0.12) 45%, transparent 70%);
+  filter: blur(50px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.svc-modal::after {
+  content: '';
+  position: absolute;
+  bottom: -50%;
+  left: -30%;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(124,106,247,0.2) 0%, transparent 70%);
+  filter: blur(50px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.svc-modal > * {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="light"] .svc-modal::before,
+[data-theme="light"] .svc-modal::after {
+  display: none;
+}
