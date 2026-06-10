@@ -1,0 +1,176 @@
+.stat-section {
+  padding: 24px;
+}
+
+.stat-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* ===== Delta ===== */
+.stat-delta {
+  font-size: 12px;
+  margin-top: 6px;
+  display: inline-block;
+}
+
+.stat-delta.up { color: #22d3a5; }
+.stat-delta.down { color: #f56342; }
+.stat-delta.neutral { color: rgba(255,255,255,0.4); }
+
+/* ===== Progress bar ===== */
+.stat-progress {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.stat-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+/* ===== Rankings ===== */
+.stat-rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.stat-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-rank-pos {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.stat-rank-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-rank-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.stat-rank-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-rank-meta {
+  color: rgba(255,255,255,0.5);
+  font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ===== Segmentos ===== */
+.stat-segment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stat-segment-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-segment-count {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* ===== Heatmap ===== */
+.stat-heatmap-wrapper {
+  overflow-x: auto;
+}
+
+.stat-heatmap {
+  display: grid;
+  gap: 4px;
+  min-width: 480px;
+}
+
+.stat-heatmap-day-label,
+.stat-heatmap-hour-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-heatmap-cell {
+  aspect-ratio: 1.4;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #1a1a2e;
+  font-weight: 600;
+}
+
+/* ===== Tema claro ===== */
+[data-theme="light"] .stat-progress {
+  background: #d8d8dc;
+}
+
+[data-theme="light"] .stat-rank-meta,
+[data-theme="light"] .stat-delta.neutral {
+  color: #999;
+}
+
+[data-theme="light"] .stat-rank-pos {
+  background: #e8e8ec;
+  box-shadow: inset 2px 2px 5px #c8c8cc, inset -2px -2px 5px #ffffff;
+}
+
+[data-theme="light"] .stat-heatmap-day-label,
+[data-theme="light"] .stat-heatmap-hour-label {
+  color: #999;
+}
+
+[data-theme="light"] .stat-heatmap-cell {
+  color: #1a1a2e;
+}
+
+@media (max-width: 880px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
