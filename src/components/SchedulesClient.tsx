@@ -34,6 +34,9 @@ type ScheduleRow = {
   day_of_week: number
   start_time: string
   end_time: string
+  break_start: string | null
+  break_end: string | null
+  has_break: boolean
   is_active: boolean
 }
 
@@ -41,27 +44,50 @@ type UserData = { full_name: string; organizations: { name: string } }
 
 const DEFAULT_START = '09:00'
 const DEFAULT_END = '18:00'
+const DEFAULT_BREAK_START = '12:00'
+const DEFAULT_BREAK_END = '13:00'
 
-function buildInitialState(rows: ScheduleRow[], organizationId: string): Record<number, ScheduleRow> {
+function buildInitialState(rows: any[], organizationId: string): Record<number, ScheduleRow> {
   const map: Record<number, ScheduleRow> = {}
   for (const day of DAYS) {
     const existing = rows.find((r) => r.day_of_week === day.value)
-    map[day.value] = existing ?? {
-      id: null,
-      organization_id: organizationId,
-      staff_id: null,
-      day_of_week: day.value,
-      start_time: DEFAULT_START,
-      end_time: DEFAULT_END,
-      is_active: false,
-    }
+    map[day.value] = existing
+      ? {
+          id: existing.id,
+          organization_id: organizationId,
+          staff_id: null,
+          day_of_week: day.value,
+          start_time: existing.start_time,
+          end_time: existing.end_time,
+          break_start: existing.break_start,
+          break_end: existing.break_end,
+          has_break: !!(existing.break_start && existing.break_end),
+          is_active: existing.is_active,
+        }
+      : {
+          id: null,
+          organization_id: organizationId,
+          staff_id: null,
+          day_of_week: day.value,
+          start_time: DEFAULT_START,
+          end_time: DEFAULT_END,
+          break_start: null,
+          break_end: null,
+          has_break: false,
+          is_active: false,
+        }
   }
   return map
 }
 
-function timeToInput(value: string): string {
-  // 'HH:MM:SS' -> 'HH:MM'
-  return value?.slice(0, 5) ?? DEFAULT_START
+function timeToInput(value: string | null): string {
+  if (!value) return DEFAULT_START
+  return value.slice(0, 5)
+}
+
+function toTimeOrNull(value: string | null): string | null {
+  if (!value) return null
+  return value.length === 5 ? value + ':00' : value
 }
 
 export default function SchedulesClient({
@@ -70,7 +96,7 @@ export default function SchedulesClient({
   organizationId,
 }: {
   userData: UserData | null
-  initialSchedules: ScheduleRow[]
+  initialSchedules: any[]
   organizationId: string
 }) {
   const router = useRouter()
@@ -109,16 +135,44 @@ export default function SchedulesClient({
     setMessage('')
   }
 
+  const toggleBreak = (day: number, enabled: boolean) => {
+    if (enabled) {
+      updateDay(day, {
+        has_break: true,
+        break_start: schedules[day].break_start ?? DEFAULT_BREAK_START,
+        break_end: schedules[day].break_end ?? DEFAULT_BREAK_END,
+      })
+    } else {
+      updateDay(day, { has_break: false, break_start: null, break_end: null })
+    }
+  }
+
   const handleSave = async () => {
     setError('')
     setMessage('')
 
-    // Validar que apertura sea antes que cierre en los días activos
     for (const day of DAYS) {
       const row = schedules[day.value]
-      if (row.is_active && row.start_time >= row.end_time) {
+      if (!row.is_active) continue
+
+      if (row.start_time >= row.end_time) {
         setError(`En ${day.label}, la hora de apertura debe ser anterior a la de cierre`)
         return
+      }
+
+      if (row.has_break) {
+        if (!row.break_start || !row.break_end) {
+          setError(`En ${day.label}, completá el horario del descanso`)
+          return
+        }
+        if (row.break_start >= row.break_end) {
+          setError(`En ${day.label}, el inicio del descanso debe ser anterior al final`)
+          return
+        }
+        if (row.break_start < row.start_time || row.break_end > row.end_time) {
+          setError(`En ${day.label}, el descanso debe estar dentro del horario laboral`)
+          return
+        }
       }
     }
 
@@ -130,8 +184,10 @@ export default function SchedulesClient({
         organization_id: organizationId,
         staff_id: null,
         day_of_week: row.day_of_week,
-        start_time: row.start_time.length === 5 ? row.start_time + ':00' : row.start_time,
-        end_time: row.end_time.length === 5 ? row.end_time + ':00' : row.end_time,
+        start_time: toTimeOrNull(row.start_time) ?? DEFAULT_START + ':00',
+        end_time: toTimeOrNull(row.end_time) ?? DEFAULT_END + ':00',
+        break_start: row.has_break ? toTimeOrNull(row.break_start) : null,
+        break_end: row.has_break ? toTimeOrNull(row.break_end) : null,
         is_active: row.is_active,
       }
 
@@ -207,7 +263,7 @@ export default function SchedulesClient({
         <div className={"db-header" + (scrolled ? " scrolled" : "")}>
           <div>
             <h1 className="db-header-title">Horarios</h1>
-            <p className="db-header-date">Definí los días y horas en que tu negocio recibe citas</p>
+            <p className="db-header-date">Definí los días, horas y descansos en que tu negocio recibe citas</p>
           </div>
           <button className="db-cta" onClick={handleSave} disabled={saving}>
             {saving ? 'Guardando...' : 'Guardar horario'}
@@ -222,42 +278,81 @@ export default function SchedulesClient({
             const row = schedules[day.value]
             return (
               <div key={day.value} className={"sch-row" + (row.is_active ? "" : " closed")}>
-                <div className="sch-day">
-                  <label className="sch-toggle">
-                    <input
-                      type="checkbox"
-                      checked={row.is_active}
-                      onChange={(e) => updateDay(day.value, { is_active: e.target.checked })}
-                    />
-                    <span className="sch-toggle-slider"></span>
-                  </label>
-                  <span className="sch-day-name">{day.label}</span>
+                <div className="sch-row-top">
+                  <div className="sch-day">
+                    <label className="sch-toggle">
+                      <input
+                        type="checkbox"
+                        checked={row.is_active}
+                        onChange={(e) => updateDay(day.value, { is_active: e.target.checked })}
+                      />
+                      <span className="sch-toggle-slider"></span>
+                    </label>
+                    <span className="sch-day-name">{day.label}</span>
+                  </div>
+
+                  {row.is_active ? (
+                    <div className="sch-times">
+                      <div className="sch-time-field">
+                        <label>Apertura</label>
+                        <input
+                          type="time"
+                          className="auth-input sch-time-input"
+                          value={timeToInput(row.start_time)}
+                          onChange={(e) => updateDay(day.value, { start_time: e.target.value })}
+                        />
+                      </div>
+                      <span className="sch-time-sep">—</span>
+                      <div className="sch-time-field">
+                        <label>Cierre</label>
+                        <input
+                          type="time"
+                          className="auth-input sch-time-input"
+                          value={timeToInput(row.end_time)}
+                          onChange={(e) => updateDay(day.value, { end_time: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="sch-closed-label">Cerrado</span>
+                  )}
                 </div>
 
-                {row.is_active ? (
-                  <div className="sch-times">
-                    <div className="sch-time-field">
-                      <label>Apertura</label>
+                {row.is_active && (
+                  <div className="sch-break-row">
+                    <label className="sch-break-toggle">
                       <input
-                        type="time"
-                        className="auth-input sch-time-input"
-                        value={timeToInput(row.start_time)}
-                        onChange={(e) => updateDay(day.value, { start_time: e.target.value })}
+                        type="checkbox"
+                        checked={row.has_break}
+                        onChange={(e) => toggleBreak(day.value, e.target.checked)}
                       />
-                    </div>
-                    <span className="sch-time-sep">—</span>
-                    <div className="sch-time-field">
-                      <label>Cierre</label>
-                      <input
-                        type="time"
-                        className="auth-input sch-time-input"
-                        value={timeToInput(row.end_time)}
-                        onChange={(e) => updateDay(day.value, { end_time: e.target.value })}
-                      />
-                    </div>
+                      <span>Descanso (ej. almuerzo)</span>
+                    </label>
+
+                    {row.has_break && (
+                      <div className="sch-times">
+                        <div className="sch-time-field">
+                          <label>Desde</label>
+                          <input
+                            type="time"
+                            className="auth-input sch-time-input"
+                            value={timeToInput(row.break_start)}
+                            onChange={(e) => updateDay(day.value, { break_start: e.target.value })}
+                          />
+                        </div>
+                        <span className="sch-time-sep">—</span>
+                        <div className="sch-time-field">
+                          <label>Hasta</label>
+                          <input
+                            type="time"
+                            className="auth-input sch-time-input"
+                            value={timeToInput(row.break_end)}
+                            onChange={(e) => updateDay(day.value, { break_end: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <span className="sch-closed-label">Cerrado</span>
                 )}
               </div>
             )
@@ -265,7 +360,7 @@ export default function SchedulesClient({
         </div>
 
         <p className="sch-note">
-          Próximamente: descansos (ej. cierre de mediodía) y excepciones por fecha (feriados, vacaciones).
+          Próximamente: excepciones por fecha (feriados, vacaciones).
         </p>
       </main>
     </div>

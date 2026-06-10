@@ -208,3 +208,54 @@
     width: 100%;
   }
 }
+
+/* ═══════════════ DESCANSOS ═══════════════ */
+
+.sch-row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+}
+
+.sch-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sch-break-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+[data-theme="light"] .sch-break-row {
+  border-top: 1px solid #d0d0d5;
+}
+
+.sch-break-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+}
+
+[data-theme="light"] .sch-break-toggle {
+  color: #666;
+}
+
+.sch-break-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #f5a623;
+  cursor: pointer;
+}
