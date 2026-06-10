@@ -208,13 +208,13 @@ function BookingModal({
 
     setSaving(true)
 
-    const { data: newClient, error: clientError } = await supabase
-      .from('clients')
-      .insert({ organization_id: organization.id, full_name: cleanName, phone: cleanPhone, email: cleanEmail || null })
-      .select('id')
-      .single()
+    const newClientId = crypto.randomUUID()
 
-    if (clientError || !newClient) {
+    const { error: clientError } = await supabase
+      .from('clients')
+      .insert({ id: newClientId, organization_id: organization.id, full_name: cleanName, phone: cleanPhone, email: cleanEmail || null })
+
+    if (clientError) {
       setError('Error al guardar tus datos. Intentá de nuevo.')
       setSaving(false)
       return
@@ -227,7 +227,7 @@ function BookingModal({
       .from('appointments')
       .insert({
         organization_id: organization.id,
-        client_id: newClient.id,
+        client_id: newClientId,
         service_id: service.id,
         staff_id: staffId,
         start_time: startISO,
