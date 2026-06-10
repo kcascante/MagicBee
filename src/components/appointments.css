@@ -439,3 +439,110 @@
 .apt-status-actions {
   margin-bottom: 16px;
 }
+
+/* ═══════════════ VISTA DE LISTA (mobile) ═══════════════ */
+
+.apt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.apt-list-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  background: rgba(20,15,40,0.35);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-left: 3px solid;
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+}
+
+.apt-list-card.cancelled {
+  opacity: 0.55;
+}
+
+[data-theme="light"] .apt-list-card {
+  background: #e8e8ec !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-left: 3px solid !important;
+  box-shadow: 6px 6px 14px #c8c8cc, -5px -5px 12px #ffffff !important;
+}
+
+.apt-list-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 52px;
+  flex-shrink: 0;
+}
+
+.apt-list-time-end {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.4);
+}
+
+[data-theme="light"] .apt-list-time-end {
+  color: #999;
+}
+
+.apt-list-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.apt-list-name {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apt-list-service {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme="light"] .apt-list-service {
+  color: #999;
+}
+
+/* En mobile: ocultar grid de escritorio y el toggle semana/dia */
+@media (max-width: 880px) {
+  .apt-grid-wrapper {
+    display: none;
+  }
+
+  .apt-view-toggle {
+    display: none;
+  }
+
+  .apt-toolbar-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .apt-select {
+    flex: 1;
+  }
+}

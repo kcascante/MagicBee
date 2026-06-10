@@ -113,11 +113,20 @@ export default function AppointmentsClient({
   const [loading, setLoading] = useState(false)
   const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null)
   const [showNewModal, setShowNewModal] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', fn)
     return () => window.removeEventListener('scroll', fn)
+  }, [])
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 880px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
   }, [])
 
   useEffect(() => {
@@ -229,6 +238,52 @@ export default function AppointmentsClient({
       setAppointments((prev) => [...prev, appt].sort((a, b) => a.start_time.localeCompare(b.start_time)))
     }
     setShowNewModal(false)
+  }
+
+  const renderList = (day: Date) => {
+    const dayAppts = apptsForDay(day)
+      .slice()
+      .sort((a, b) => a.start_time.localeCompare(b.start_time))
+
+    if (dayAppts.length === 0) {
+      return (
+        <div className="db-empty">
+          <p className="db-empty-title">No hay citas este dia</p>
+          <p className="db-empty-subtitle">Usa "+ Nueva cita" para agendar una.</p>
+        </div>
+      )
+    }
+
+    return (
+      <div className="apt-list">
+        {dayAppts.map((appt) => {
+          const color = STATUS_COLORS[appt.status] ?? '#7c6af7'
+          return (
+            <button
+              key={appt.id}
+              type="button"
+              className={"apt-list-card" + (appt.status === 'cancelled' ? " cancelled" : "")}
+              style={{ borderLeftColor: color }}
+              onClick={() => setSelectedAppt(appt)}
+            >
+              <div className="apt-list-time">
+                <span>{fmtTime(appt.start_time)}</span>
+                <span className="apt-list-time-end">{fmtTime(appt.end_time)}</span>
+              </div>
+              <div className="apt-list-info">
+                <span className="apt-list-name">{appt.clients?.full_name ?? 'Cliente'}</span>
+                <span className="apt-list-service">
+                  {appt.services?.name}{appt.staff ? ` \u00b7 ${appt.staff.full_name}` : ''}
+                </span>
+              </div>
+              <span className="svc-badge" style={{ color, background: color + '22', border: `1px solid ${color}55` }}>
+                {STATUS_LABELS[appt.status] ?? appt.status}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    )
   }
 
   const renderGrid = (dayList: Date[]) => {
@@ -370,7 +425,7 @@ export default function AppointmentsClient({
           </div>
         </div>
 
-        {view === 'day' && (
+        {(view === 'day' || isMobile) && (
           <div className="apt-day-nav">
             {days.map((d, i) => {
               const isToday = fmtDateInput(d) === fmtDateInput(new Date())
@@ -390,6 +445,8 @@ export default function AppointmentsClient({
 
         {loading ? (
           <div className="db-empty"><p className="db-empty-title">Cargando...</p></div>
+        ) : isMobile ? (
+          renderList(days[selectedDayIdx])
         ) : (
           view === 'week' ? renderGrid(days) : renderGrid([days[selectedDayIdx]])
         )}
