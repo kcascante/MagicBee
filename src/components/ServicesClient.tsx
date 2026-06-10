@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import '@/components/auth.css'
@@ -25,6 +25,7 @@ type Service = {
   duration_minutes: number
   price: number
   is_active: boolean
+  image_url: string | null
   created_at: string
 }
 
@@ -35,6 +36,8 @@ function sanitizeText(value: string): string {
 }
 
 const EMPTY_FORM = { name: '', description: '', duration_minutes: '30', price: '' }
+const MAX_IMAGE_MB = 3
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 export default function ServicesClient({
   userData,
@@ -55,6 +58,10 @@ export default function ServicesClient({
   const [form, setForm] = useState(EMPTY_FORM)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20)
@@ -63,9 +70,9 @@ export default function ServicesClient({
   }, [])
 
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? 'hidden' : ''
+    document.body.style.overflow = menuOpen || showForm ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
-  }, [menuOpen])
+  }, [menuOpen, showForm])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -79,6 +86,9 @@ export default function ServicesClient({
   const openNewForm = () => {
     setEditingId(null)
     setForm(EMPTY_FORM)
+    setImageFile(null)
+    setImagePreview(null)
+    setExistingImageUrl(null)
     setError('')
     setShowForm(true)
   }
@@ -91,6 +101,9 @@ export default function ServicesClient({
       duration_minutes: String(service.duration_minutes),
       price: String(service.price),
     })
+    setImageFile(null)
+    setImagePreview(null)
+    setExistingImageUrl(service.image_url)
     setError('')
     setShowForm(true)
   }
@@ -99,7 +112,55 @@ export default function ServicesClient({
     setShowForm(false)
     setEditingId(null)
     setForm(EMPTY_FORM)
+    setImageFile(null)
+    setImagePreview(null)
+    setExistingImageUrl(null)
     setError('')
+  }
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError('Solo se permiten imágenes JPG, PNG o WebP')
+      return
+    }
+    if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+      setError(`La imagen no puede superar ${MAX_IMAGE_MB}MB`)
+      return
+    }
+
+    setError('')
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
+  }
+
+  const removeImage = () => {
+    setImageFile(null)
+    setImagePreview(null)
+    setExistingImageUrl(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const uploadImage = async (serviceId: string): Promise<string | null> => {
+    if (!imageFile) return existingImageUrl
+
+    const ext = imageFile.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+    const path = `${organizationId}/${serviceId}.${ext}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('service-images')
+      .upload(path, imageFile, { upsert: true, contentType: imageFile.type })
+
+    if (uploadError) {
+      console.error('Error subiendo imagen:', uploadError)
+      return existingImageUrl
+    }
+
+    const { data } = supabase.storage.from('service-images').getPublicUrl(path)
+    // Cache-bust para que se refresque al reemplazar la imagen
+    return data.publicUrl + '?v=' + Date.now()
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -120,9 +181,10 @@ export default function ServicesClient({
     setSaving(true)
 
     if (editingId) {
+      const image_url = await uploadImage(editingId)
       const { data, error: updateError } = await supabase
         .from('services')
-        .update({ name, description, duration_minutes: duration, price })
+        .update({ name, description, duration_minutes: duration, price, image_url })
         .eq('id', editingId)
         .select()
         .single()
@@ -130,14 +192,30 @@ export default function ServicesClient({
       if (updateError) { setError('Error al actualizar el servicio'); setSaving(false); return }
       setServices((prev) => prev.map((s) => (s.id === editingId ? (data as Service) : s)))
     } else {
-      const { data, error: insertError } = await supabase
+      const { data: created, error: insertError } = await supabase
         .from('services')
         .insert({ organization_id: organizationId, name, description, duration_minutes: duration, price })
         .select()
         .single()
 
-      if (insertError) { setError('Error al crear el servicio'); setSaving(false); return }
-      setServices((prev) => [data as Service, ...prev])
+      if (insertError || !created) { setError('Error al crear el servicio'); setSaving(false); return }
+
+      let newService = created as Service
+
+      if (imageFile) {
+        const image_url = await uploadImage(newService.id)
+        if (image_url) {
+          const { data: updated } = await supabase
+            .from('services')
+            .update({ image_url })
+            .eq('id', newService.id)
+            .select()
+            .single()
+          if (updated) newService = updated as Service
+        }
+      }
+
+      setServices((prev) => [newService, ...prev])
     }
 
     setSaving(false)
@@ -173,6 +251,8 @@ export default function ServicesClient({
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(price)
+
+  const currentPreview = imagePreview ?? existingImageUrl
 
   return (
     <div className="db-root">
@@ -227,6 +307,11 @@ export default function ServicesClient({
           <div className="svc-grid">
             {services.map((service) => (
               <div key={service.id} className={"svc-card" + (service.is_active ? "" : " inactive")}>
+                {service.image_url && (
+                  <div className="svc-card-image">
+                    <img src={service.image_url} alt={service.name} loading="lazy" />
+                  </div>
+                )}
                 <div className="svc-card-top">
                   <div>
                     <h3 className="svc-card-name">{service.name}</h3>
@@ -273,6 +358,37 @@ export default function ServicesClient({
               Completá la información del servicio que ofrecés.
             </p>
             <form onSubmit={handleSubmit} className="auth-form" autoComplete="off">
+
+              <div className="auth-field">
+                <label>Imagen del servicio (opcional)</label>
+                {currentPreview ? (
+                  <div className="svc-image-preview">
+                    <img src={currentPreview} alt="Vista previa" />
+                    <div className="svc-image-actions">
+                      <button type="button" className="db-action-btn" style={{ color: '#7c6af7', border: '1px solid rgba(124,106,247,0.3)' }} onClick={() => fileInputRef.current?.click()}>
+                        Cambiar
+                      </button>
+                      <button type="button" className="db-action-btn" style={{ color: '#f56342', border: '1px solid rgba(245,99,66,0.3)' }} onClick={removeImage}>
+                        Quitar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button type="button" className="svc-image-drop" onClick={() => fileInputRef.current?.click()}>
+                    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                    <span>Subir imagen</span>
+                    <span className="svc-image-hint">JPG, PNG o WebP — máx {MAX_IMAGE_MB}MB</span>
+                  </button>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleImageSelect}
+                  style={{ display: 'none' }}
+                />
+              </div>
+
               <div className="auth-field">
                 <label>Nombre del servicio</label>
                 <input
