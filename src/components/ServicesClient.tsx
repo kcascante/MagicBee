@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import '@/components/auth.css'
 import './dashboard.css'
 import './services.css'
 
@@ -151,7 +152,13 @@ export default function ServicesClient({
       .select()
       .single()
 
-    if (!updateError && data) {
+    if (updateError) {
+      console.error('Error al cambiar estado:', updateError)
+      alert('Error al cambiar el estado: ' + updateError.message)
+      return
+    }
+
+    if (data) {
       setServices((prev) => prev.map((s) => (s.id === service.id ? (data as Service) : s)))
     }
   }
