@@ -546,3 +546,19 @@
     flex: 1;
   }
 }
+
+/* Evitar que el badge de estado se corte en mobile */
+.apt-list-card .svc-badge {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .apt-list-card {
+    flex-wrap: wrap;
+  }
+
+  .apt-list-info {
+    min-width: 120px;
+  }
+}
