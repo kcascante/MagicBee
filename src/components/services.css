@@ -240,3 +240,36 @@
   display: block;
   margin-bottom: 6px;
 }
+
+/* ═══════════════ GLOW PARA REALZAR EL GLASSMORFISMO (dark) ═══════════════ */
+
+.svc-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.svc-card::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  right: -40%;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(245,166,35,0.25) 0%, rgba(245,99,66,0.12) 45%, transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.svc-card.inactive::before {
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+}
+
+.svc-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="light"] .svc-card::before {
+  display: none;
+}
