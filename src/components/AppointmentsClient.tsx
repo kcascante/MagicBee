@@ -478,13 +478,16 @@ function AppointmentDetailModal({
 
         <p className="sch-time-field-label" style={{ marginTop: 16, marginBottom: 8 }}>Cambiar estado</p>
         <div className="apt-status-actions">
-          {appt.status !== 'confirmed' && appt.status !== 'completed' && appt.status !== 'cancelled' && (
+          {appt.status !== 'pending' && (
+            <button className="db-action-btn" style={{ color: STATUS_COLORS.pending, border: `1px solid ${STATUS_COLORS.pending}55` }} onClick={() => onUpdateStatus(appt.id, 'pending')}>Pendiente</button>
+          )}
+          {appt.status !== 'confirmed' && (
             <button className="db-action-btn" style={{ color: STATUS_COLORS.confirmed, border: `1px solid ${STATUS_COLORS.confirmed}55` }} onClick={() => onUpdateStatus(appt.id, 'confirmed')}>Confirmar</button>
           )}
-          {appt.status !== 'completed' && appt.status !== 'cancelled' && (
+          {appt.status !== 'completed' && (
             <button className="db-action-btn" style={{ color: STATUS_COLORS.completed, border: `1px solid ${STATUS_COLORS.completed}55` }} onClick={() => onUpdateStatus(appt.id, 'completed')}>Completada</button>
           )}
-          {appt.status !== 'no_show' && appt.status !== 'completed' && appt.status !== 'cancelled' && (
+          {appt.status !== 'no_show' && (
             <button className="db-action-btn" style={{ color: STATUS_COLORS.no_show, border: `1px solid ${STATUS_COLORS.no_show}55` }} onClick={() => onUpdateStatus(appt.id, 'no_show')}>No asistió</button>
           )}
           {appt.status !== 'cancelled' && (
