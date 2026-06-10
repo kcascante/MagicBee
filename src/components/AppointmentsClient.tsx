@@ -485,8 +485,16 @@ function AppointmentDetailModal({
   onUpdateStatus: (id: string, status: string) => void
 }) {
   return (
-    <div className="svc-modal-overlay" onClick={onClose}>
-      <div className="svc-modal" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="svc-modal-overlay"
+      onClick={onClose}
+      style={{ alignItems: 'flex-start', overflowY: 'auto', padding: '40px 20px' }}
+    >
+      <div
+        className="svc-modal"
+        onClick={(e) => e.stopPropagation()}
+        style={{ margin: '0 auto', maxHeight: 'none' }}
+      >
         <div className="apt-detail-header">
           <h2 className="auth-card-title" style={{ marginBottom: 4 }}>{appt.clients?.full_name ?? 'Cliente'}</h2>
           <span className="svc-badge" style={{ color: STATUS_COLORS[appt.status], background: STATUS_COLORS[appt.status] + '22', border: `1px solid ${STATUS_COLORS[appt.status]}55` }}>
