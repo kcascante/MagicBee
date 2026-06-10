@@ -1,0 +1,226 @@
+/* ═══════════════ STAFF — TOGGLE DE CONFIGURACIÓN ═══════════════ */
+
+.staff-setting-row {
+  background: rgba(20,15,40,0.35);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-top: 1px solid rgba(255,255,255,0.25);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+[data-theme="light"] .staff-setting-row {
+  background: #e8e8ec !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-top: none !important;
+  box-shadow: 6px 6px 14px #c8c8cc, -5px -5px 12px #ffffff !important;
+}
+
+.staff-setting-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.staff-setting-subtitle {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  margin: 0;
+  line-height: 1.5;
+  max-width: 480px;
+}
+
+[data-theme="light"] .staff-setting-subtitle {
+  color: #999;
+}
+
+/* ═══════════════ GRID DE STAFF ═══════════════ */
+
+.staff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.staff-card {
+  background: rgba(20,15,40,0.35);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-top: 1px solid rgba(255,255,255,0.25);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.staff-card:hover {
+  transform: translateY(-3px);
+}
+
+.staff-card.inactive {
+  opacity: 0.55;
+}
+
+[data-theme="light"] .staff-card {
+  background: #e8e8ec !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-top: none !important;
+  box-shadow: 6px 6px 14px #c8c8cc, -5px -5px 12px #ffffff !important;
+}
+
+[data-theme="light"] .staff-card:hover {
+  box-shadow: 9px 9px 18px #c0c0c4, -6px -6px 14px #ffffff !important;
+}
+
+.staff-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5a623, #f56342);
+  border: 2px solid rgba(255,255,255,0.15);
+  flex-shrink: 0;
+}
+
+.staff-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.staff-avatar-initials {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.staff-name {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 4px 0 0;
+}
+
+.staff-contact {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  margin: 0;
+}
+
+[data-theme="light"] .staff-contact {
+  color: #999;
+}
+
+.staff-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.staff-card-actions .db-action-btn {
+  flex: 1;
+  text-align: center;
+  min-width: 80px;
+  font-size: 12px;
+  padding: 8px 10px;
+}
+
+/* ═══════════════ AVATAR EN EL MODAL DE EDICIÓN ═══════════════ */
+
+.staff-avatar-edit {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.06);
+  border: 1px dashed rgba(255,255,255,0.25);
+  cursor: pointer;
+  color: rgba(255,255,255,0.5);
+  margin-top: 8px;
+}
+
+.staff-avatar-edit img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.staff-avatar-edit-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.staff-avatar-edit:hover .staff-avatar-edit-overlay {
+  opacity: 1;
+}
+
+[data-theme="light"] .staff-avatar-edit {
+  background: #e8e8ec !important;
+  border: 1px dashed #b8b8bc !important;
+  box-shadow: inset 3px 3px 7px #c8c8cc, inset -3px -3px 7px #ffffff !important;
+}
+
+/* ═══════════════ RESPONSIVE ═══════════════ */
+
+@media (max-width: 880px) {
+  .db-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .db-header .db-cta {
+    width: 100%;
+    text-align: center;
+  }
+
+  .staff-setting-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .staff-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .staff-grid {
+    grid-template-columns: 1fr;
+  }
+}

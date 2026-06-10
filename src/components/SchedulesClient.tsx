@@ -11,6 +11,7 @@ const NAV = [
   { label: 'Panel', href: '/dashboard', active: false },
   { label: 'Citas', href: '/dashboard/appointments', active: false },
   { label: 'Servicios', href: '/dashboard/services', active: false },
+  { label: 'Staff', href: '/dashboard/staff', active: false },
   { label: 'Clientes', href: '/dashboard/clients', active: false },
   { label: 'Horarios', href: '/dashboard/schedules', active: true },
   { label: 'Estadísticas', href: '/dashboard/stats', active: false },
