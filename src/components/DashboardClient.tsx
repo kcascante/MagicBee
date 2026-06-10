@@ -16,15 +16,32 @@ const NAV = [
   { label: 'Configuración', href: '/dashboard/settings', active: false },
 ]
 
-const METRICS = [
-  { label: 'Citas hoy', value: '0', color: '#f5a623' },
-  { label: 'Citas esta semana', value: '0', color: '#7c6af7' },
-  { label: 'Clientes totales', value: '0', color: '#22d3a5' },
-  { label: 'Ingresos estimados', value: '\u20a10', color: '#f56342' },
-]
-
 type Metric = { label: string; value: string; color: string }
 type UserData = { full_name: string; organizations: { name: string } }
+type DashboardMetrics = { today: number; week: number; clients: number; revenue: number }
+type TodayAppointment = {
+  id: string
+  start_time: string
+  status: string
+  clients: { full_name: string } | null
+  services: { name: string } | null
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: '#7c6af7',
+  confirmed: '#f5a623',
+  completed: '#22d3a5',
+  cancelled: '#888888',
+  no_show: '#f56342',
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Pendiente',
+  confirmed: 'Confirmada',
+  completed: 'Completada',
+  cancelled: 'Cancelada',
+  no_show: 'No asistió',
+}
 
 function GlassCard({ metric }: { metric: Metric }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -39,7 +56,15 @@ function GlassCard({ metric }: { metric: Metric }) {
   )
 }
 
-export default function DashboardClient({ userData }: { userData: UserData | null }) {
+export default function DashboardClient({
+  userData,
+  metrics,
+  todayAppointments,
+}: {
+  userData: UserData | null
+  metrics?: DashboardMetrics
+  todayAppointments?: TodayAppointment[]
+}) {
   const router = useRouter()
   const supabase = createClient()
   const [scrolled, setScrolled] = useState(false)
@@ -64,6 +89,16 @@ export default function DashboardClient({ userData }: { userData: UserData | nul
 
   const orgName = userData?.organizations?.name ?? 'Tu negocio'
   const firstName = userData?.full_name?.split(' ')[0] ?? 'Admin'
+
+  const m = metrics ?? { today: 0, week: 0, clients: 0, revenue: 0 }
+  const appts = todayAppointments ?? []
+
+  const METRICS: Metric[] = [
+    { label: 'Citas hoy', value: String(m.today), color: '#f5a623' },
+    { label: 'Citas esta semana', value: String(m.week), color: '#7c6af7' },
+    { label: 'Clientes totales', value: String(m.clients), color: '#22d3a5' },
+    { label: 'Ingresos estimados', value: '\u20a1' + m.revenue.toLocaleString('es-CR'), color: '#f56342' },
+  ]
 
   return (
     <div className="db-root">
@@ -109,19 +144,41 @@ export default function DashboardClient({ userData }: { userData: UserData | nul
           <p className="db-header-date">{new Date().toLocaleDateString('es-CR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
         </div>
         <div className="db-metrics">
-          {METRICS.map((m) => <GlassCard key={m.label} metric={m} />)}
+          {METRICS.map((mt) => <GlassCard key={mt.label} metric={mt} />)}
         </div>
         <p className="db-actions-label">Acciones rápidas</p>
         <div className="db-actions">
-          <button className="db-action-btn" style={{ color: '#f5a623', border: '1px solid rgba(245,166,35,0.3)' }}>+ Nueva cita</button>
-          <button className="db-action-btn" style={{ color: '#7c6af7', border: '1px solid rgba(124,106,247,0.3)' }}>+ Agregar servicio</button>
-          <button className="db-action-btn" style={{ color: '#22d3a5', border: '1px solid rgba(34,211,165,0.3)' }}>+ Nuevo cliente</button>
+          <a href="/dashboard/appointments" className="db-action-btn" style={{ color: '#f5a623', border: '1px solid rgba(245,166,35,0.3)' }}>+ Nueva cita</a>
+          <a href="/dashboard/services" className="db-action-btn" style={{ color: '#7c6af7', border: '1px solid rgba(124,106,247,0.3)' }}>+ Agregar servicio</a>
+          <a href="/dashboard/clients" className="db-action-btn" style={{ color: '#22d3a5', border: '1px solid rgba(34,211,165,0.3)' }}>+ Nuevo cliente</a>
         </div>
-        <div className="db-empty">
-          <p className="db-empty-title">No hay citas hoy</p>
-          <p className="db-empty-subtitle">Configura tus servicios y horarios para empezar a recibir reservas</p>
-          <button className="db-cta">Configurar mi negocio</button>
-        </div>
+
+        {appts.length > 0 ? (
+          <div className="db-today-list">
+            <p className="db-actions-label">Citas de hoy</p>
+            {appts.map((a) => (
+              <div key={a.id} className="db-today-row">
+                <span className="db-today-time">
+                  {new Date(a.start_time).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+                <span className="db-today-client">{a.clients?.full_name ?? 'Cliente'}</span>
+                <span className="db-today-service">{a.services?.name ?? ''}</span>
+                <span
+                  className="db-today-status"
+                  style={{ color: STATUS_COLORS[a.status] ?? '#888', border: `1px solid ${STATUS_COLORS[a.status] ?? '#888'}55` }}
+                >
+                  {STATUS_LABELS[a.status] ?? a.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="db-empty">
+            <p className="db-empty-title">No hay citas hoy</p>
+            <p className="db-empty-subtitle">Configura tus servicios y horarios para empezar a recibir reservas</p>
+            <a href="/dashboard/settings" className="db-cta">Configurar mi negocio</a>
+          </div>
+        )}
       </main>
     </div>
   )
