@@ -342,7 +342,11 @@
 
 /* ===== Fix: permitir scroll del overlay cuando el modal es mas alto que la pantalla ===== */
 .svc-modal-overlay {
-  align-items: flex-start !important;
+  display: block !important;
   overflow-y: auto !important;
   padding: 40px 20px !important;
+}
+
+.svc-modal {
+  margin: 0 auto !important;
 }
