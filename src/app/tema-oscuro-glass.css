@@ -1,0 +1,219 @@
+/* ============================================
+   TEMA OSCURO — FONDO AZUL + ORBS + GLASSMORFISMO EXTENDIDO
+   ============================================ */
+
+/* ---------- 1. FONDO RAIZ ---------- */
+.db-root {
+  position: relative;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 800px at 15% 10%, rgba(124,106,247,0.10), transparent 60%),
+    radial-gradient(1000px 700px at 85% 20%, rgba(245,166,35,0.07), transparent 55%),
+    radial-gradient(900px 900px at 50% 100%, rgba(34,211,165,0.06), transparent 60%),
+    linear-gradient(160deg, #070b1a 0%, #0a1024 45%, #0a0a1f 100%);
+  overflow-x: hidden;
+}
+
+.db-root::before,
+.db-root::after {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(80px);
+}
+
+.db-root::before {
+  width: 480px; height: 480px;
+  top: -120px; left: -100px;
+  background: radial-gradient(circle, rgba(124,106,247,0.45), transparent 70%);
+  animation: dorb1 10s ease-in-out infinite alternate;
+}
+
+.db-root::after {
+  width: 520px; height: 520px;
+  bottom: -160px; right: -120px;
+  background: radial-gradient(circle, rgba(245,166,35,0.32), transparent 70%);
+  animation: dorb2 12s ease-in-out infinite alternate;
+}
+
+.db-orb {
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(90px);
+}
+.db-orb-teal {
+  width: 420px; height: 420px;
+  top: 45%; left: 60%;
+  background: radial-gradient(circle, rgba(34,211,165,0.28), transparent 70%);
+  animation: dorb1 11s ease-in-out infinite alternate;
+}
+.db-orb-blue {
+  width: 560px; height: 560px;
+  top: 20%; left: 35%;
+  background: radial-gradient(circle, rgba(74,108,247,0.30), transparent 70%);
+  animation: dorb2 13s ease-in-out infinite alternate;
+}
+
+.db-sidebar, .db-main { position: relative; z-index: 1; }
+
+[data-theme="light"] .db-orb,
+[data-theme="light"] .db-root::before,
+[data-theme="light"] .db-root::after {
+  display: none !important;
+}
+
+/* ---------- 2. GLASSMORFISMO + BORDE BRILLANTE (CARDS, HORARIOS, INPUTS) ---------- */
+.db-glass,
+.db-card,
+.db-empty,
+.db-header.scrolled,
+.db-schedule,
+.db-schedule-row,
+input.db-input,
+textarea.db-input,
+select.db-input {
+  background: rgba(20,15,40,0.35);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-top: 1px solid rgba(255,255,255,0.25);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+input.db-input, textarea.db-input, select.db-input {
+  border-radius: 12px;
+}
+
+.db-glass, .db-card, .db-schedule,
+.db-schedule-row { position: relative; }
+
+.db-glass::after,
+.db-card::after,
+.db-schedule::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.35),
+    rgba(124,106,247,0.25) 40%,
+    transparent 70%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ---------- 3. FULLCALENDAR — GLASSMORFISMO ---------- */
+.fc {
+  background: rgba(20,15,40,0.35);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  padding: 12px;
+  color: #fff;
+}
+
+.fc .fc-toolbar-title {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.fc .fc-button {
+  background: rgba(255,255,255,0.08) !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  text-transform: capitalize;
+}
+.fc .fc-button:hover {
+  background: rgba(255,255,255,0.16) !important;
+  transform: translateY(-1px);
+}
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background: linear-gradient(135deg, #f5a623, #f56342) !important;
+  border-color: transparent !important;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th,
+.fc-theme-standard .fc-scrollgrid {
+  border-color: rgba(255,255,255,0.12) !important;
+}
+
+.fc .fc-col-header-cell {
+  background: rgba(255,255,255,0.04);
+}
+
+.fc .fc-daygrid-day,
+.fc .fc-timegrid-slot,
+.fc .fc-timegrid-col {
+  background: transparent;
+}
+
+.fc .fc-day-today {
+  background: rgba(245,166,35,0.10) !important;
+}
+
+.fc .fc-daygrid-day-number,
+.fc .fc-col-header-cell-cushion,
+.fc .fc-timegrid-slot-label-cushion,
+.fc .fc-timegrid-axis-cushion {
+  color: rgba(255,255,255,0.75);
+}
+
+.fc-event,
+.fc-daygrid-event,
+.fc-timegrid-event {
+  background: rgba(124,106,247,0.35) !important;
+  border: 1px solid rgba(124,106,247,0.55) !important;
+  backdrop-filter: blur(8px);
+  border-radius: 8px !important;
+  color: #fff !important;
+}
+
+.fc-event:hover {
+  background: rgba(124,106,247,0.5) !important;
+}
+
+/* ---------- 4. TEMA CLARO: NEUTRALIZAR FULLCALENDAR ---------- */
+[data-theme="light"] .fc {
+  background: #e8e8ec !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: 6px 6px 14px #c8c8cc, -5px -5px 12px #ffffff !important;
+  color: #1A1A2E;
+}
+[data-theme="light"] .fc .fc-toolbar-title,
+[data-theme="light"] .fc .fc-daygrid-day-number,
+[data-theme="light"] .fc .fc-col-header-cell-cushion,
+[data-theme="light"] .fc .fc-timegrid-slot-label-cushion,
+[data-theme="light"] .fc .fc-timegrid-axis-cushion {
+  color: #1A1A2E !important;
+}
+[data-theme="light"] .fc .fc-button {
+  background: #e8e8ec !important;
+  border: none !important;
+  color: #1A1A2E !important;
+  box-shadow: 6px 6px 14px #c8c8cc, -5px -5px 12px #ffffff !important;
+}
+[data-theme="light"] .fc-theme-standard td,
+[data-theme="light"] .fc-theme-standard th {
+  border-color: #d0d0d5 !important;
+}
