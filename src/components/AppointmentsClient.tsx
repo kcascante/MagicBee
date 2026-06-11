@@ -70,7 +70,14 @@ function getMonday(d: Date) {
 }
 
 function fmtDateInput(d: Date) {
-  return d.toISOString().slice(0, 10)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function apptDateStr(iso: string) {
+  return fmtDateInput(new Date(iso))
 }
 
 function fmtTime(iso: string) {
@@ -264,7 +271,7 @@ export default function AppointmentsClient({
 
   const apptsForDay = (day: Date) => {
     const dayStr = fmtDateInput(day)
-    return filteredAppointments.filter((a) => a.start_time.slice(0, 10) === dayStr)
+    return filteredAppointments.filter((a) => apptDateStr(a.start_time) === dayStr)
   }
 
   const toMinutes = (iso: string) => {
@@ -326,7 +333,7 @@ export default function AppointmentsClient({
 
   const apptsForMonthDay = (day: Date) => {
     const dayStr = fmtDateInput(day)
-    return filteredMonthAppointments.filter((a) => a.start_time.slice(0, 10) === dayStr)
+    return filteredMonthAppointments.filter((a) => apptDateStr(a.start_time) === dayStr)
   }
 
   const updateStatus = async (id: string, status: string) => {
