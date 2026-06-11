@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/lib/theme'
 import { ThemeSwitch } from '@/components/ThemeSwitch'
+import { GlassSpotlight } from '@/components/GlassSpotlight'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           {children}
           <ThemeSwitch />
+          <GlassSpotlight />
         </ThemeProvider>
       </body>
     </html>
