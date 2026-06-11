@@ -1,0 +1,148 @@
+.cm-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #f5f5f7;
+  font-family: -apple-system, Helvetica, Arial, sans-serif;
+}
+
+.cm-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  color: #1a1a2e;
+}
+
+.cm-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+}
+
+.cm-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.cm-logo-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.cm-org-name {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.cm-body {
+  padding: 24px;
+}
+
+.cm-status-row {
+  margin-bottom: 12px;
+}
+
+.cm-status-badge {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.cm-title {
+  font-size: 18px;
+  margin: 0 0 16px;
+}
+
+.cm-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.cm-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.cm-label {
+  color: #888;
+}
+
+.cm-value {
+  font-weight: 600;
+}
+
+.cm-note {
+  font-size: 13px;
+  color: #888;
+  background: #f7f7f9;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.cm-cancel-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(245,99,66,0.3);
+  background: rgba(245,99,66,0.08);
+  color: #f56342;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cm-secondary-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #888;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cm-confirm p {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.cm-confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.cm-confirm-actions .cm-cancel-btn {
+  flex: 1;
+}
+
+.cm-error {
+  color: #f56342;
+  font-size: 13px;
+  margin-top: 12px;
+}

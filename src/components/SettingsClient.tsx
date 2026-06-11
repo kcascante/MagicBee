@@ -98,6 +98,7 @@ export default function SettingsClient({ userData, organization }: { userData: U
     timezone: organization?.timezone ?? 'America/Costa_Rica',
     primary_color: organization?.primary_color ?? '#f5a623',
     slug: organization?.slug ?? '',
+    cancellation_window_hours: organization?.cancellation_window_hours ?? 2,
   })
 
   const [logoUrl, setLogoUrl] = useState<string | null>(organization?.logo_url ?? null)
@@ -217,11 +218,17 @@ export default function SettingsClient({ userData, organization }: { userData: U
     if (!slug || slug.length < 3) { setError('El identificador del portal debe tener al menos 3 caracteres'); return }
     if (slug.length > 60) { setError('El identificador del portal es demasiado largo'); return }
 
+    const cancellationWindow = Number(form.cancellation_window_hours)
+    if (!Number.isFinite(cancellationWindow) || cancellationWindow < 0 || cancellationWindow > 168) {
+      setError('La ventana de cancelación debe ser un número entre 0 y 168 horas')
+      return
+    }
+
     setSaving(true)
 
     const { error: updateError } = await supabase
       .from('organizations')
-      .update({ name, phone: phone || null, email: email || null, address: address || null, timezone: form.timezone, primary_color, slug })
+      .update({ name, phone: phone || null, email: email || null, address: address || null, timezone: form.timezone, primary_color, slug, cancellation_window_hours: cancellationWindow })
       .eq('id', organization.id)
 
     if (updateError) {
@@ -368,6 +375,22 @@ export default function SettingsClient({ userData, organization }: { userData: U
                       Si cambiás este identificador, los links que ya compartiste con tus clientes ({window.location.origin}/p/{organization.slug}) dejarán de funcionar.
                     </p>
                   )}
+                </div>
+
+                <div className="auth-field" style={{ marginTop: 16 }}>
+                  <label>Ventana de cancelación (horas)</label>
+                  <input
+                    className="auth-input"
+                    type="number"
+                    min={0}
+                    max={168}
+                    value={form.cancellation_window_hours}
+                    onChange={(e) => setForm({ ...form, cancellation_window_hours: e.target.value === '' ? 0 : Number(e.target.value) })}
+                    style={{ maxWidth: 140 }}
+                  />
+                  <p className="cl-empty-history" style={{ marginTop: 6 }}>
+                    Tus clientes podrán cancelar su cita online hasta esta cantidad de horas antes de la cita.
+                  </p>
                 </div>
 
                 {portalUrl && (
