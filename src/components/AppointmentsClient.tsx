@@ -267,6 +267,57 @@ export default function AppointmentsClient({
     return filteredAppointments.filter((a) => a.start_time.slice(0, 10) === dayStr)
   }
 
+  const toMinutes = (iso: string) => {
+    const d = new Date(iso)
+    return d.getHours() * 60 + d.getMinutes()
+  }
+
+  const layoutDay = (dayAppts: Appointment[]) => {
+    const sorted = [...dayAppts].sort((a, b) => a.start_time.localeCompare(b.start_time))
+    const result: { appt: Appointment; col: number; cols: number }[] = []
+    let cluster: { appt: Appointment; col: number; cols: number }[] = []
+    let clusterEnd = -Infinity
+
+    const flushCluster = () => {
+      if (cluster.length === 0) return
+      const colsEnd: number[] = []
+      for (const item of cluster) {
+        const start = toMinutes(item.appt.start_time)
+        let placed = false
+        for (let c = 0; c < colsEnd.length; c++) {
+          if (colsEnd[c] <= start) {
+            item.col = c
+            colsEnd[c] = toMinutes(item.appt.end_time)
+            placed = true
+            break
+          }
+        }
+        if (!placed) {
+          item.col = colsEnd.length
+          colsEnd.push(toMinutes(item.appt.end_time))
+        }
+      }
+      const totalCols = colsEnd.length
+      for (const item of cluster) {
+        item.cols = totalCols
+        result.push(item)
+      }
+      cluster = []
+    }
+
+    for (const appt of sorted) {
+      const start = toMinutes(appt.start_time)
+      if (start >= clusterEnd) {
+        flushCluster()
+        clusterEnd = -Infinity
+      }
+      cluster.push({ appt, col: 0, cols: 1 })
+      clusterEnd = Math.max(clusterEnd, toMinutes(appt.end_time))
+    }
+    flushCluster()
+    return result
+  }
+
   const filteredMonthAppointments = useMemo(() => {
     if (staffFilter === 'all') return monthAppointments
     if (staffFilter === 'none') return monthAppointments.filter((a) => !a.staff_id)
@@ -397,13 +448,13 @@ export default function AppointmentsClient({
 
           {/* Day columns */}
           {dayList.map((d) => {
-            const dayAppts = apptsForDay(d)
+            const dayAppts = layoutDay(apptsForDay(d))
             return (
               <div key={d.toISOString()} className="apt-day-col" style={{ height: gridHeight }}>
                 {hours.map((h) => (
                   <div key={h} className="apt-hour-line" style={{ height: PX_PER_MIN * 60 }}></div>
                 ))}
-                {dayAppts.map((appt) => {
+                {dayAppts.map(({ appt, col, cols }) => {
                   const start = new Date(appt.start_time)
                   const end = new Date(appt.end_time)
                   const startMin = start.getHours() * 60 + start.getMinutes() - START_HOUR * 60
@@ -411,16 +462,18 @@ export default function AppointmentsClient({
                   const top = Math.max(0, startMin * PX_PER_MIN)
                   const height = Math.max(durMin * PX_PER_MIN, 28)
                   const color = STATUS_COLORS[appt.status] ?? '#7c6af7'
+                  const widthPct = 100 / cols
+                  const leftPct = col * widthPct
                   return (
                     <button
                       key={appt.id}
-                      className={"apt-block" + (appt.status === 'cancelled' ? " cancelled" : "")}
-                      style={{ top, height, borderLeftColor: color, background: color + '22' }}
+                      className={"apt-block" + (appt.status === 'cancelled' ? " cancelled" : "") + (cols > 1 ? " split" : "")}
+                      style={{ top, height, left: `${leftPct}%`, width: `calc(${widthPct}% - 2px)`, borderLeftColor: color, background: color + '22' }}
                       onClick={() => setSelectedAppt(appt)}
                     >
                       <span className="apt-block-time">{fmtTime(appt.start_time)}</span>
                       <span className="apt-block-name">{appt.clients?.full_name ?? 'Cliente'}</span>
-                      <span className="apt-block-service">{appt.services?.name}</span>
+                      <span className="apt-block-service">{appt.services?.name}{appt.staff ? ` \u00b7 ${appt.staff.full_name}` : ''}</span>
                     </button>
                   )
                 })}

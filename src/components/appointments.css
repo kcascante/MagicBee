@@ -691,3 +691,14 @@
     font-size: 11px;
   }
 }
+
+
+/* ===== Citas superpuestas: bloques mas angostos ===== */
+.apt-block.split {
+  font-size: 11px;
+  padding: 4px 6px;
+}
+
+.apt-block.split .apt-block-service {
+  display: none;
+}
