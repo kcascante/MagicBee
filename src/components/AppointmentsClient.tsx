@@ -363,7 +363,7 @@ export default function AppointmentsClient({
   }
 
   const handleNewAppointmentCreated = (appt: Appointment) => {
-    const apptDay = appt.start_time.slice(0, 10)
+    const apptDay = apptDateStr(appt.start_time)
     const weekDays = days.map((d) => fmtDateInput(d))
     if (weekDays.includes(apptDay)) {
       setAppointments((prev) => [...prev, appt].sort((a, b) => a.start_time.localeCompare(b.start_time)))
