@@ -65,6 +65,7 @@ type Organization = {
   plan_type: string | null
   plan_status: string | null
   plan_expires_at: string | null
+  cancellation_window_hours: number | null
 }
 
 type UserData = { full_name: string; organizations: Organization }
