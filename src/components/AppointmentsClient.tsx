@@ -104,7 +104,15 @@ export default function AppointmentsClient({
   const [menuOpen, setMenuOpen] = useState(false)
   const [weekStart, setWeekStart] = useState(new Date(initialWeekStart))
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments)
-  const [view, setView] = useState<'week' | 'day'>('week')
+  const [view, setView] = useState<'week' | 'day' | 'month'>('week')
+  const [monthDate, setMonthDate] = useState(() => {
+    const d = new Date()
+    d.setDate(1)
+    d.setHours(0, 0, 0, 0)
+    return d
+  })
+  const [monthAppointments, setMonthAppointments] = useState<Appointment[]>([])
+  const [monthLoading, setMonthLoading] = useState(false)
   const [selectedDayIdx, setSelectedDayIdx] = useState(() => {
     const today = new Date()
     const diff = Math.floor((today.getTime() - getMonday(today).getTime()) / 86400000)
@@ -135,6 +143,13 @@ export default function AppointmentsClient({
     document.body.style.overflow = lock ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [menuOpen, selectedAppt, showNewModal])
+
+  useEffect(() => {
+    if (view === 'month' && monthAppointments.length === 0 && !monthLoading) {
+      fetchMonth(monthDate)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -177,7 +192,40 @@ export default function AppointmentsClient({
     setLoading(false)
   }
 
+  const fetchMonth = async (date: Date) => {
+    setMonthLoading(true)
+    const firstOfMonth = new Date(date.getFullYear(), date.getMonth(), 1)
+    const gridStart = getMonday(firstOfMonth)
+    const gridEnd = new Date(gridStart)
+    gridEnd.setDate(gridEnd.getDate() + 42)
+
+    const { data } = await supabase
+      .from('appointments')
+      .select(`
+        id, start_time, end_time, status, notes, booked_via,
+        client_id, service_id, staff_id,
+        clients(full_name, phone, email),
+        services(name, duration_minutes, price),
+        staff(id, full_name, avatar_url)
+      `)
+      .eq('organization_id', organizationId)
+      .gte('start_time', gridStart.toISOString())
+      .lt('start_time', gridEnd.toISOString())
+      .order('start_time', { ascending: true })
+
+    setMonthAppointments((data ?? []) as any)
+    setMonthDate(firstOfMonth)
+    setMonthLoading(false)
+  }
+
   const goToToday = () => {
+    if (view === 'month') {
+      const d = new Date()
+      d.setDate(1)
+      d.setHours(0, 0, 0, 0)
+      fetchMonth(d)
+      return
+    }
     const monday = getMonday(new Date())
     fetchWeek(monday)
     const today = new Date()
@@ -185,12 +233,24 @@ export default function AppointmentsClient({
   }
 
   const goPrevWeek = () => {
+    if (view === 'month') {
+      const d = new Date(monthDate)
+      d.setMonth(d.getMonth() - 1)
+      fetchMonth(d)
+      return
+    }
     const prev = new Date(weekStart)
     prev.setDate(prev.getDate() - 7)
     fetchWeek(prev)
   }
 
   const goNextWeek = () => {
+    if (view === 'month') {
+      const d = new Date(monthDate)
+      d.setMonth(d.getMonth() + 1)
+      fetchMonth(d)
+      return
+    }
     const next = new Date(weekStart)
     next.setDate(next.getDate() + 7)
     fetchWeek(next)
@@ -205,6 +265,17 @@ export default function AppointmentsClient({
   const apptsForDay = (day: Date) => {
     const dayStr = fmtDateInput(day)
     return filteredAppointments.filter((a) => a.start_time.slice(0, 10) === dayStr)
+  }
+
+  const filteredMonthAppointments = useMemo(() => {
+    if (staffFilter === 'all') return monthAppointments
+    if (staffFilter === 'none') return monthAppointments.filter((a) => !a.staff_id)
+    return monthAppointments.filter((a) => a.staff_id === staffFilter)
+  }, [monthAppointments, staffFilter])
+
+  const apptsForMonthDay = (day: Date) => {
+    const dayStr = fmtDateInput(day)
+    return filteredMonthAppointments.filter((a) => a.start_time.slice(0, 10) === dayStr)
   }
 
   const updateStatus = async (id: string, status: string) => {
@@ -353,7 +424,62 @@ export default function AppointmentsClient({
     )
   }
 
+  const renderMonthGrid = () => {
+    const firstOfMonth = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1)
+    const gridStart = getMonday(firstOfMonth)
+    const monthDays = Array.from({ length: 42 }, (_, i) => {
+      const d = new Date(gridStart)
+      d.setDate(d.getDate() + i)
+      return d
+    })
+    const currentMonth = monthDate.getMonth()
+    const monthDayNames = [...DAY_NAMES_SHORT.slice(1), DAY_NAMES_SHORT[0]]
+
+    const handleDayClick = (day: Date) => {
+      const monday = getMonday(day)
+      fetchWeek(monday)
+      setSelectedDayIdx(Math.floor((day.getTime() - monday.getTime()) / 86400000))
+      setView('day')
+    }
+
+    return (
+      <div className="apt-month-grid">
+        {monthDayNames.map((name) => (
+          <div key={name} className="apt-month-day-name">{name}</div>
+        ))}
+        {monthDays.map((d) => {
+          const dayAppts = apptsForMonthDay(d)
+          const isToday = fmtDateInput(d) === fmtDateInput(new Date())
+          const inMonth = d.getMonth() === currentMonth
+          const counts: Record<string, number> = {}
+          dayAppts.forEach((a) => { counts[a.status] = (counts[a.status] ?? 0) + 1 })
+          return (
+            <button
+              key={d.toISOString()}
+              type="button"
+              className={"apt-month-cell" + (isToday ? " today" : "") + (inMonth ? "" : " outside")}
+              onClick={() => handleDayClick(d)}
+            >
+              <span className="apt-month-date">{d.getDate()}</span>
+              {dayAppts.length > 0 && (
+                <div className="apt-month-dots">
+                  {Object.entries(counts).map(([status]) => (
+                    <span key={status} className="apt-month-dot" style={{ background: STATUS_COLORS[status] ?? '#888' }} />
+                  ))}
+                  <span className="apt-month-count">{dayAppts.length}</span>
+                </div>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    )
+  }
+
   const weekRangeLabel = () => {
+    if (view === 'month') {
+      return monthDate.toLocaleDateString('es-CR', { month: 'long', year: 'numeric' })
+    }
     const end = new Date(weekStart)
     end.setDate(end.getDate() + 6)
     const opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }
@@ -422,6 +548,7 @@ export default function AppointmentsClient({
             <div className="apt-view-toggle">
               <button className={view === 'week' ? 'active' : ''} onClick={() => setView('week')}>Semana</button>
               <button className={view === 'day' ? 'active' : ''} onClick={() => setView('day')}>Día</button>
+              <button className={view === 'month' ? 'active' : ''} onClick={() => setView('month')}>Mes</button>
             </div>
           </div>
         </div>
@@ -444,7 +571,11 @@ export default function AppointmentsClient({
           </div>
         )}
 
-        {loading ? (
+        {view === 'month' ? (
+          monthLoading ? (
+            <div className="db-empty"><p className="db-empty-title">Cargando...</p></div>
+          ) : renderMonthGrid()
+        ) : loading ? (
           <div className="db-empty"><p className="db-empty-title">Cargando...</p></div>
         ) : (
           view === 'week' ? renderGrid(days) : renderGrid([days[selectedDayIdx]])
