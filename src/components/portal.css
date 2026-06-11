@@ -485,3 +485,34 @@
     padding: 22px;
   }
 }
+
+/* MB-DARK-PORTAL-V1 */
+/* MODO OSCURO - PORTAL PUBLICO */
+[data-theme="dark"] .portal-root { background:#131318; color:#f0f0f3; color-scheme:dark; }
+[data-theme="dark"] .portal-header { background:#1a1a22; border-bottom:1px solid rgba(255,255,255,0.08); }
+[data-theme="dark"] .portal-brand-address { color:rgba(255,255,255,0.5); }
+[data-theme="dark"] .portal-hero p,
+[data-theme="dark"] .portal-empty { color:rgba(255,255,255,0.55); }
+[data-theme="dark"] .portal-service-card { background:#1c1c24; border:1px solid rgba(255,255,255,0.08); }
+[data-theme="dark"] .portal-service-card:hover { box-shadow:0 12px 32px rgba(0,0,0,0.45); }
+[data-theme="dark"] .portal-service-desc { color:rgba(255,255,255,0.55); }
+[data-theme="dark"] .portal-service-duration { color:rgba(255,255,255,0.45); }
+[data-theme="dark"] .portal-footer { color:rgba(255,255,255,0.35); }
+[data-theme="dark"] .portal-btn-secondary { background:rgba(255,255,255,0.08); color:#e0e0e6; }
+[data-theme="dark"] .portal-modal { background:#1c1c24; }
+[data-theme="dark"] .portal-modal-close { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.7); }
+[data-theme="dark"] .portal-modal-subtitle { color:rgba(255,255,255,0.45); }
+[data-theme="dark"] .portal-step-label { color:rgba(255,255,255,0.7); }
+[data-theme="dark"] .portal-field label { color:rgba(255,255,255,0.55); }
+[data-theme="dark"] .portal-input { background:#15151b; border:1px solid rgba(255,255,255,0.12); color:#f0f0f3; }
+[data-theme="dark"] .portal-input:focus { background:#1a1a22; border-color:var(--accent); }
+[data-theme="dark"] .portal-input::placeholder { color:rgba(255,255,255,0.3); }
+[data-theme="dark"] .portal-note { color:rgba(255,255,255,0.45); }
+[data-theme="dark"] .portal-error { background:rgba(192,57,43,0.18); color:#ff8a7a; }
+[data-theme="dark"] .portal-staff-option { color:rgba(255,255,255,0.6); }
+[data-theme="dark"] .portal-staff-option:hover { background:rgba(255,255,255,0.06); }
+[data-theme="dark"] .portal-slot-btn { background:#15151b; border:1px solid rgba(255,255,255,0.12); color:#e0e0e6; }
+[data-theme="dark"] .portal-slot-btn:hover { border-color:var(--accent); }
+[data-theme="dark"] .portal-slot-btn.selected { background:var(--accent); color:#fff; border-color:var(--accent); }
+[data-theme="dark"] .portal-confirm p { color:rgba(255,255,255,0.6); }
+[data-theme="dark"] .portal-confirm-note { color:rgba(255,255,255,0.45); }
