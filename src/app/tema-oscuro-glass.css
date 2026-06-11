@@ -217,3 +217,91 @@ input.db-input, textarea.db-input, select.db-input {
 [data-theme="light"] .fc-theme-standard th {
   border-color: #d0d0d5 !important;
 }
+
+
+/* ============================================
+   GLASSMORFISMO GENERICO — HORARIOS / CONFIGURACION
+   Cubre contenedores cuyo className incluya estas palabras,
+   sin importar el nombre exacto del componente.
+   ============================================ */
+[data-theme="dark"] [class*="card"]:not(.db-card):not(.fc-event),
+[data-theme="dark"] [class*="Card"]:not(.db-card):not(.fc-event),
+[data-theme="dark"] [class*="panel"]:not(.db-glass),
+[data-theme="dark"] [class*="Panel"]:not(.db-glass),
+[data-theme="dark"] [class*="section"]:not(.db-header),
+[data-theme="dark"] [class*="Section"]:not(.db-header),
+[data-theme="dark"] [class*="box"],
+[data-theme="dark"] [class*="Box"],
+[data-theme="dark"] [class*="schedule"]:not(.db-schedule):not(.db-schedule-row),
+[data-theme="dark"] [class*="Schedule"]:not(.db-schedule):not(.db-schedule-row),
+[data-theme="dark"] [class*="horario"],
+[data-theme="dark"] [class*="Horario"],
+[data-theme="dark"] [class*="config"],
+[data-theme="dark"] [class*="Config"],
+[data-theme="dark"] [class*="settings"],
+[data-theme="dark"] [class*="Settings"] {
+  background: rgba(20,15,40,0.35) !important;
+  backdrop-filter: blur(32px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  border-top: 1px solid rgba(255,255,255,0.25) !important;
+  border-radius: 16px !important;
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.15) !important;
+  position: relative;
+}
+
+/* Halo brillante para los mismos contenedores */
+[data-theme="dark"] [class*="card"]:not(.db-card)::after,
+[data-theme="dark"] [class*="Card"]:not(.db-card)::after,
+[data-theme="dark"] [class*="panel"]:not(.db-glass)::after,
+[data-theme="dark"] [class*="Panel"]:not(.db-glass)::after,
+[data-theme="dark"] [class*="section"]:not(.db-header)::after,
+[data-theme="dark"] [class*="Section"]:not(.db-header)::after,
+[data-theme="dark"] [class*="box"]::after,
+[data-theme="dark"] [class*="Box"]::after,
+[data-theme="dark"] [class*="schedule"]:not(.db-schedule):not(.db-schedule-row)::after,
+[data-theme="dark"] [class*="Schedule"]:not(.db-schedule):not(.db-schedule-row)::after,
+[data-theme="dark"] [class*="horario"]::after,
+[data-theme="dark"] [class*="Horario"]::after,
+[data-theme="dark"] [class*="config"]::after,
+[data-theme="dark"] [class*="Config"]::after,
+[data-theme="dark"] [class*="settings"]::after,
+[data-theme="dark"] [class*="Settings"]::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.35),
+    rgba(124,106,247,0.25) 40%,
+    transparent 70%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Inputs y selects dentro de horarios/configuracion */
+[data-theme="dark"] [class*="schedule"] input,
+[data-theme="dark"] [class*="schedule"] select,
+[data-theme="dark"] [class*="schedule"] textarea,
+[data-theme="dark"] [class*="horario"] input,
+[data-theme="dark"] [class*="horario"] select,
+[data-theme="dark"] [class*="horario"] textarea,
+[data-theme="dark"] [class*="config"] input,
+[data-theme="dark"] [class*="config"] select,
+[data-theme="dark"] [class*="config"] textarea,
+[data-theme="dark"] [class*="settings"] input,
+[data-theme="dark"] [class*="settings"] select,
+[data-theme="dark"] [class*="settings"] textarea {
+  background: rgba(255,255,255,0.05) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  border-radius: 10px !important;
+  color: #fff !important;
+}
