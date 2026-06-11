@@ -363,6 +363,11 @@ export default function SettingsClient({ userData, organization }: { userData: U
                 <div className="auth-field">
                   <label>Identificador (slug)</label>
                   <input className="auth-input" type="text" value={form.slug} onChange={(e) => setForm({ ...form, slug: sanitizeSlug(e.target.value) })} maxLength={60} placeholder="mi-negocio" spellCheck={false} autoComplete="off" />
+                  {form.slug !== (organization.slug ?? '') && (
+                    <p className="set-slug-warning">
+                      Si cambiás este identificador, los links que ya compartiste con tus clientes ({window.location.origin}/p/{organization.slug}) dejarán de funcionar.
+                    </p>
+                  )}
                 </div>
 
                 {portalUrl && (
