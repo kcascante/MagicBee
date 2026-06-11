@@ -2,7 +2,7 @@
   min-height: 100vh;
   display: flex;
   font-family: Inter, system-ui, sans-serif;
-  background: linear-gradient(135deg, #0a1428 0%, #0d1a35 50%, #080c1a 100%) /* MB-NAVY-BG-V1 */;
+  background: linear-gradient(135deg, #0d2547 0%, #102d5c 50%, #040810 100%) /* MB-NAVY-BG-V2 */;
 }
 
 .auth-left {

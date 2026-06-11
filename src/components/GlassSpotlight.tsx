@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 
 const SELECTOR =
-  '.db-card, .db-empty, .apt-list-card, .cl-card, .svc-card, .svc-modal, .staff-card, .sa-card, .sa-panel, .auth-card'
+  '.db-card, .db-empty, .apt-list-card, .cl-card, .svc-card, .svc-modal, .staff-card, .sa-card, .sa-panel, .auth-card, .portal-header, .portal-service-card, .portal-modal'
 
 export function GlassSpotlight() {
   useEffect(() => {

@@ -494,7 +494,7 @@
     radial-gradient(circle at 15% 15%, rgba(124,106,247,0.24), transparent 42%),
     radial-gradient(circle at 85% 10%, rgba(245,166,35,0.20), transparent 45%),
     radial-gradient(circle at 50% 100%, rgba(34,211,165,0.16), transparent 50%),
-    #0a1428; /* MB-NAVY-BG-V1 */
+    #0d2547; /* MB-NAVY-BG-V2 */
 }
 [data-theme="dark"] .portal-root::before,
 [data-theme="dark"] .portal-root::after {
@@ -518,21 +518,29 @@
   [data-theme="dark"] .portal-root::after { animation:none; }
 }
 [data-theme="dark"] .portal-header {
-  background:rgba(20,15,40,0.45);
-  -webkit-backdrop-filter:blur(24px) saturate(180%);
-  backdrop-filter:blur(24px) saturate(180%);
-  border-bottom:1px solid rgba(255,255,255,0.12);
+  background:
+    radial-gradient(240px circle at var(--spot-x, -9999px) var(--spot-y, -9999px), rgba(255,255,255,0.30), transparent 70%),
+    linear-gradient(135deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.06) 100%),
+    rgba(255,255,255,0.04);
+  -webkit-backdrop-filter:blur(40px) saturate(220%);
+  backdrop-filter:blur(40px) saturate(220%);
+  border-bottom:1px solid rgba(255,255,255,0.18);
+  transition: background 0.15s ease;
 }
 [data-theme="dark"] .portal-brand-address { color:rgba(255,255,255,0.5); }
 [data-theme="dark"] .portal-hero p,
 [data-theme="dark"] .portal-empty { color:rgba(255,255,255,0.6); }
 [data-theme="dark"] .portal-service-card {
-  background:rgba(20,15,40,0.35);
-  -webkit-backdrop-filter:blur(32px) saturate(180%);
-  backdrop-filter:blur(32px) saturate(180%);
-  border:1px solid rgba(255,255,255,0.15);
-  border-top:1px solid rgba(255,255,255,0.25);
-  box-shadow:0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  background:
+    radial-gradient(240px circle at var(--spot-x, -9999px) var(--spot-y, -9999px), rgba(255,255,255,0.35), transparent 70%),
+    linear-gradient(135deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.08) 100%),
+    rgba(255,255,255,0.04);
+  -webkit-backdrop-filter:blur(40px) saturate(220%);
+  backdrop-filter:blur(40px) saturate(220%);
+  border:1px solid rgba(255,255,255,0.18);
+  border-top:1px solid rgba(255,255,255,0.4);
+  box-shadow:0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.3);
+  transition: background 0.15s ease, box-shadow 0.2s ease;
 }
 [data-theme="dark"] .portal-service-card:hover {
   box-shadow:0 14px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
@@ -545,12 +553,15 @@
   border:1px solid rgba(255,255,255,0.12);
 }
 [data-theme="dark"] .portal-modal {
-  background:rgba(20,15,40,0.6);
-  -webkit-backdrop-filter:blur(32px) saturate(180%);
-  backdrop-filter:blur(32px) saturate(180%);
-  border:1px solid rgba(255,255,255,0.15);
-  border-top:1px solid rgba(255,255,255,0.25);
-  box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+  background:
+    radial-gradient(240px circle at var(--spot-x, -9999px) var(--spot-y, -9999px), rgba(255,255,255,0.35), transparent 70%),
+    linear-gradient(135deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.08) 100%),
+    rgba(255,255,255,0.06);
+  -webkit-backdrop-filter:blur(40px) saturate(220%);
+  backdrop-filter:blur(40px) saturate(220%);
+  border:1px solid rgba(255,255,255,0.18);
+  border-top:1px solid rgba(255,255,255,0.4);
+  box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
 }
 [data-theme="dark"] .portal-modal-close { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.7); }
 [data-theme="dark"] .portal-modal-subtitle { color:rgba(255,255,255,0.45); }
@@ -646,3 +657,5 @@
   box-shadow:4px 4px 12px #c8c8cc, -3px -3px 10px #ffffff;
 }
 /* MB-LIGHT-PORTAL END */
+
+/* MB-FROSTED-GLASS-PORTAL-V1 */
