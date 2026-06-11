@@ -129,9 +129,14 @@
   }
 }
 
-/* MB-FROSTED-GLASS-V1 */
+/* MB-FROSTED-GLASS-V2 */
 /* ============================================================
-   VIDRIO ESMERILADO INTENSIFICADO (tema oscuro, todas las paginas)
+   VIDRIO ESMERILADO + BRILLO DE MOUSE (tema oscuro, todas las paginas)
+   El brillo va como capa de "background" (radial-gradient), por lo
+   que siempre se pinta DEBAJO del contenido, sin problemas de z-index.
+   --spot-x / --spot-y los actualiza GlassSpotlight.tsx (en px,
+   relativos a la card). Por defecto apuntan fuera del elemento
+   (-9999px) para que el brillo no se vea hasta que el mouse entra.
    ============================================================ */
 [data-theme="dark"] .db-card,
 [data-theme="dark"] .db-empty,
@@ -144,61 +149,27 @@
 [data-theme="dark"] .sa-panel,
 [data-theme="dark"] .auth-card {
   background:
+    radial-gradient(240px circle at var(--spot-x, -9999px) var(--spot-y, -9999px), rgba(255,255,255,0.35), transparent 70%),
     linear-gradient(135deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.08) 100%),
     rgba(255,255,255,0.04) !important;
   backdrop-filter: blur(40px) saturate(220%) !important;
   -webkit-backdrop-filter: blur(40px) saturate(220%) !important;
   box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.3) !important;
+  transition: background 0.15s ease, box-shadow 0.2s ease;
 }
 
 [data-theme="dark"] .db-card:hover,
+[data-theme="dark"] .db-empty:hover,
+[data-theme="dark"] .apt-list-card:hover,
 [data-theme="dark"] .cl-card:hover,
 [data-theme="dark"] .svc-card:hover,
+[data-theme="dark"] .svc-modal:hover,
 [data-theme="dark"] .staff-card:hover,
 [data-theme="dark"] .sa-card:hover,
+[data-theme="dark"] .sa-panel:hover,
 [data-theme="dark"] .auth-card:hover {
   background:
+    radial-gradient(240px circle at var(--spot-x, -9999px) var(--spot-y, -9999px), rgba(255,255,255,0.4), transparent 70%),
     linear-gradient(135deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.10) 100%),
     rgba(255,255,255,0.06) !important;
-}
-
-/* ============================================================
-   BRILLO QUE SIGUE AL MOUSE (spotlight) en cards principales
-   ============================================================ */
-[data-theme="dark"] .apt-list-card,
-[data-theme="dark"] .cl-card,
-[data-theme="dark"] .svc-card,
-[data-theme="dark"] .staff-card,
-[data-theme="dark"] .sa-card,
-[data-theme="dark"] .auth-card,
-[data-theme="dark"] .db-empty {
-  position: relative;
-  overflow: hidden;
-}
-
-[data-theme="dark"] .apt-list-card::before,
-[data-theme="dark"] .cl-card::before,
-[data-theme="dark"] .svc-card::before,
-[data-theme="dark"] .staff-card::before,
-[data-theme="dark"] .sa-card::before,
-[data-theme="dark"] .auth-card::before,
-[data-theme="dark"] .db-empty::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(220px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(255,255,255,0.16), transparent 70%);
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  pointer-events: none;
-  z-index: 2;
-}
-
-[data-theme="dark"] .apt-list-card:hover::before,
-[data-theme="dark"] .cl-card:hover::before,
-[data-theme="dark"] .svc-card:hover::before,
-[data-theme="dark"] .staff-card:hover::before,
-[data-theme="dark"] .sa-card:hover::before,
-[data-theme="dark"] .auth-card:hover::before,
-[data-theme="dark"] .db-empty:hover::before {
-  opacity: 1;
 }
