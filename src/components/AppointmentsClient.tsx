@@ -241,19 +241,6 @@ export default function AppointmentsClient({
     setShowNewModal(false)
   }
 
-  const renderWeekListMobile = (weekDays: Date[]) => (
-    <div className="apt-week-list">
-      {weekDays.map((d) => (
-        <div key={d.toISOString()} className="apt-week-list-day">
-          <p className="apt-week-list-date">
-            {DAY_NAMES_SHORT[d.getDay()]} {d.getDate()}{fmtDateInput(d) === fmtDateInput(new Date()) ? ' · Hoy' : ''}
-          </p>
-          {renderList(d)}
-        </div>
-      ))}
-    </div>
-  )
-
   const renderList = (day: Date) => {
     const dayAppts = apptsForDay(day)
       .slice()
@@ -459,8 +446,6 @@ export default function AppointmentsClient({
 
         {loading ? (
           <div className="db-empty"><p className="db-empty-title">Cargando...</p></div>
-        ) : isMobile ? (
-          view === 'week' ? renderWeekListMobile(days) : renderList(days[selectedDayIdx])
         ) : (
           view === 'week' ? renderGrid(days) : renderGrid([days[selectedDayIdx]])
         )}

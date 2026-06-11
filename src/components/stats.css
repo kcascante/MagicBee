@@ -186,3 +186,23 @@
   position: relative;
   width: 100%;
 }
+
+
+/* ===== Fix responsive movil ===== */
+.db-root, .db-main {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+.stat-section, .stat-chart-wrap {
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .stat-heatmap {
+    min-width: 380px;
+  }
+  .stat-heatmap-cell {
+    font-size: 9px;
+  }
+}

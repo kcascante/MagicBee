@@ -588,24 +588,3 @@
     max-width: 100%;
   }
 }
-
-
-/* ===== Vista semana en lista (movil) ===== */
-.apt-week-list {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.apt-week-list-date {
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: rgba(255,255,255,0.5);
-  margin-bottom: 8px;
-}
-
-[data-theme="light"] .apt-week-list-date {
-  color: #999;
-}
