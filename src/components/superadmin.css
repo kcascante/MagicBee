@@ -1,6 +1,6 @@
 .sa-root {
   min-height: 100vh;
-  background: #0a0a0f;
+  background: linear-gradient(160deg, #0a1428 0%, #080c1a 100%); /* MB-NAVY-BG-V1 */
   color: #fff;
   font-family: Inter, system-ui, sans-serif;
   padding: 40px;
@@ -12,7 +12,7 @@
   content: '';
   position: fixed;
   width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(124,106,247,0.2) 0%, rgba(180,100,255,0.1) 30%, transparent 60%);
+  background: radial-gradient(circle, rgba(124,106,247,0.30) 0%, rgba(180,100,255,0.14) 30%, transparent 60%);
   top: -200px; right: 100px;
   border-radius: 50%;
   animation: saorb1 10s ease-in-out infinite alternate;
@@ -23,7 +23,7 @@
   content: '';
   position: fixed;
   width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(245,140,35,0.18) 0%, rgba(245,80,80,0.1) 30%, transparent 60%);
+  background: radial-gradient(circle, rgba(245,166,35,0.22) 0%, rgba(245,99,66,0.12) 30%, transparent 60%);
   bottom: -150px; left: 250px;
   border-radius: 50%;
   animation: saorb2 12s ease-in-out infinite alternate;

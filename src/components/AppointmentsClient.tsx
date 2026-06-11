@@ -126,6 +126,8 @@ export default function AppointmentsClient({
     return diff
   })
   const [staffFilter, setStaffFilter] = useState<string>('all')
+  // MB-STATUS-FILTER-V1
+  const [statusFilter, setStatusFilter] = useState<string>('all')
   const [loading, setLoading] = useState(false)
   const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null)
   const [showNewModal, setShowNewModal] = useState(false)
@@ -264,10 +266,19 @@ export default function AppointmentsClient({
   }
 
   const filteredAppointments = useMemo(() => {
-    if (staffFilter === 'all') return appointments
-    if (staffFilter === 'none') return appointments.filter((a) => !a.staff_id)
-    return appointments.filter((a) => a.staff_id === staffFilter)
-  }, [appointments, staffFilter])
+    let result = appointments
+    if (staffFilter === 'all') {
+      // sin cambios
+    } else if (staffFilter === 'none') {
+      result = result.filter((a) => !a.staff_id)
+    } else {
+      result = result.filter((a) => a.staff_id === staffFilter)
+    }
+    if (statusFilter !== 'all') {
+      result = result.filter((a) => a.status === statusFilter)
+    }
+    return result
+  }, [appointments, staffFilter, statusFilter])
 
   const apptsForDay = (day: Date) => {
     const dayStr = fmtDateInput(day)
@@ -326,10 +337,19 @@ export default function AppointmentsClient({
   }
 
   const filteredMonthAppointments = useMemo(() => {
-    if (staffFilter === 'all') return monthAppointments
-    if (staffFilter === 'none') return monthAppointments.filter((a) => !a.staff_id)
-    return monthAppointments.filter((a) => a.staff_id === staffFilter)
-  }, [monthAppointments, staffFilter])
+    let result = monthAppointments
+    if (staffFilter === 'all') {
+      // sin cambios
+    } else if (staffFilter === 'none') {
+      result = result.filter((a) => !a.staff_id)
+    } else {
+      result = result.filter((a) => a.staff_id === staffFilter)
+    }
+    if (statusFilter !== 'all') {
+      result = result.filter((a) => a.status === statusFilter)
+    }
+    return result
+  }, [monthAppointments, staffFilter, statusFilter])
 
   const apptsForMonthDay = (day: Date) => {
     const dayStr = fmtDateInput(day)
@@ -613,6 +633,12 @@ export default function AppointmentsClient({
                 ))}
               </select>
             )}
+            <select className="auth-input apt-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="all">Todos los estados</option>
+              {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
             <div className="apt-view-toggle">
               <button className={view === 'week' ? 'active' : ''} onClick={() => setView('week')}>Semana</button>
               <button className={view === 'day' ? 'active' : ''} onClick={() => setView('day')}>Día</button>
