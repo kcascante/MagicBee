@@ -527,10 +527,11 @@
   color: #999;
 }
 
-/* En mobile: ocultar grid de escritorio y el toggle semana/dia */
+/* En mobile: permitir scroll horizontal del grid de escritorio */
 @media (max-width: 880px) {
   .apt-grid-wrapper {
-    display: none;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .apt-view-toggle button {
