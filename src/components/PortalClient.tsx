@@ -222,10 +222,12 @@ function BookingModal({
 
     const startISO = new Date(`${date}T${selectedSlot.slot_start}`).toISOString()
     const endISO = new Date(`${date}T${selectedSlot.slot_end}`).toISOString()
+    const newApptId = crypto.randomUUID()
 
     const { error: apptError } = await supabase
       .from('appointments')
       .insert({
+        id: newApptId,
         organization_id: organization.id,
         client_id: newClientId,
         service_id: service.id,
@@ -241,6 +243,12 @@ function BookingModal({
       setSaving(false)
       return
     }
+
+    fetch('/api/notifications/appointment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ appointmentId: newApptId }),
+    }).catch(() => {})
 
     setSaving(false)
     setDone(true)
