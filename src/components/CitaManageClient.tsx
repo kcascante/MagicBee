@@ -29,6 +29,15 @@ type Appointment = {
   clients: { full_name: string } | null
 }
 
+type Review = {
+  id: string
+  rating: number
+  comment: string | null
+  admin_reply: string | null
+  admin_reply_at: string | null
+  created_at: string
+}
+
 type Organization = {
   name: string
   slug: string
@@ -47,11 +56,17 @@ function initials(name: string) {
   return name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('')
 }
 
-export default function CitaManageClient({ appointment, organization }: { appointment: Appointment; organization: Organization }) {
+export default function CitaManageClient({ appointment, organization, existingReview }: { appointment: Appointment; organization: Organization; existingReview: Review | null }) {
   const [status, setStatus] = useState(appointment.status)
   const [cancelling, setCancelling] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [error, setError] = useState('')
+  const [review, setReview] = useState<Review | null>(existingReview)
+  const [ratingInput, setRatingInput] = useState(0)
+  const [hoverRating, setHoverRating] = useState(0)
+  const [commentInput, setCommentInput] = useState('')
+  const [submittingReview, setSubmittingReview] = useState(false)
+  const [reviewError, setReviewError] = useState('')
 
   const accent = organization.primary_color && /^#[0-9a-fA-F]{6}$/.test(organization.primary_color) ? organization.primary_color : '#f5a623'
   const timezone = organization.timezone || 'America/Costa_Rica'
@@ -88,6 +103,36 @@ export default function CitaManageClient({ appointment, organization }: { appoin
       setError('No se pudo cancelar la cita. Intentá de nuevo.')
     }
     setCancelling(false)
+  }
+
+  const handleSubmitReview = async () => {
+    if (ratingInput < 1 || ratingInput > 5) {
+      setReviewError('Seleccioná una calificación de 1 a 5 estrellas.')
+      return
+    }
+    setSubmittingReview(true)
+    setReviewError('')
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appointmentId: appointment.id, rating: ratingInput, comment: commentInput }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        if (data.error === 'already_reviewed') {
+          setReviewError('Ya enviaste una reseña para esta cita.')
+        } else {
+          setReviewError('No se pudo enviar la reseña. Intentá de nuevo.')
+        }
+        setSubmittingReview(false)
+        return
+      }
+      setReview(data.review)
+    } catch {
+      setReviewError('No se pudo enviar la reseña. Intentá de nuevo.')
+    }
+    setSubmittingReview(false)
   }
 
   return (
@@ -144,6 +189,65 @@ export default function CitaManageClient({ appointment, organization }: { appoin
 
           {(status === 'completed' || status === 'no_show') && (
             <p className="cm-note">Esta cita ya fue atendida.</p>
+          )}
+
+          {status === 'completed' && (
+            <div className="cm-review">
+              {review ? (
+                <>
+                  <p className="cm-review-title">Tu reseña</p>
+                  <div className="cm-stars">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <span key={n} className={'cm-star' + (n <= review.rating ? ' filled' : '')}>★</span>
+                    ))}
+                  </div>
+                  {review.comment && <p className="cm-review-thanks">{review.comment}</p>}
+                  {!review.comment && <p className="cm-review-thanks">¡Gracias por tu calificación!</p>}
+                  {review.admin_reply && (
+                    <div className="cm-review-reply">
+                      <div className="cm-review-reply-label">Respuesta de {organization.name}</div>
+                      <div className="cm-review-reply-text">{review.admin_reply}</div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="cm-review-title">¿Cómo fue tu experiencia?</p>
+                  <div className="cm-stars">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        className={'cm-star' + (n <= (hoverRating || ratingInput) ? ' filled' : '')}
+                        onMouseEnter={() => setHoverRating(n)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        onClick={() => setRatingInput(n)}
+                        disabled={submittingReview}
+                        aria-label={`${n} estrella${n === 1 ? '' : 's'}`}
+                      >★</button>
+                    ))}
+                  </div>
+                  <textarea
+                    className="cm-review-textarea"
+                    placeholder="Contanos cómo te fue (opcional)"
+                    value={commentInput}
+                    onChange={(e) => setCommentInput(e.target.value.slice(0, 1000))}
+                    maxLength={1000}
+                    disabled={submittingReview}
+                  />
+                  <button
+                    type="button"
+                    className="cm-review-submit"
+                    style={{ background: accent }}
+                    onClick={handleSubmitReview}
+                    disabled={submittingReview || ratingInput < 1}
+                  >
+                    {submittingReview ? 'Enviando...' : 'Enviar reseña'}
+                  </button>
+                  {reviewError && <p className="cm-error">{reviewError}</p>}
+                </>
+              )}
+            </div>
           )}
 
           {(status === 'pending' || status === 'confirmed') && !canCancel && (

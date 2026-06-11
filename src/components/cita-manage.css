@@ -146,3 +146,105 @@
   font-size: 13px;
   margin-top: 12px;
 }
+
+/* ─── Reseñas (cita completada) ─── */
+.cm-review {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.cm-review-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+
+.cm-stars {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.cm-stars span.cm-star,
+.cm-stars button.cm-star {
+  font-size: 26px;
+  line-height: 1;
+  color: #ddd;
+}
+
+button.cm-star {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease, transform 0.1s ease;
+}
+
+button.cm-star:hover {
+  transform: scale(1.1);
+}
+
+button.cm-star:disabled {
+  cursor: default;
+}
+
+.cm-star.filled {
+  color: #f5a623;
+}
+
+.cm-review-textarea {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 70px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.cm-review-submit {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cm-review-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cm-review-thanks {
+  font-size: 13px;
+  color: #888;
+  margin: 0 0 4px;
+}
+
+.cm-review-reply {
+  margin-top: 12px;
+  background: #f7f7f9;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.cm-review-reply-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.cm-review-reply-text {
+  font-size: 13px;
+  color: #1a1a2e;
+}

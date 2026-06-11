@@ -659,3 +659,110 @@
 /* MB-LIGHT-PORTAL END */
 
 /* MB-FROSTED-GLASS-PORTAL-V1 */
+
+/* ═══════════════ RESEÑAS ═══════════════ */
+.portal-reviews {
+  margin-top: 48px;
+}
+
+.portal-reviews-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.portal-reviews-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.portal-reviews-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.portal-reviews-score {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.portal-reviews-total {
+  color: #888;
+  font-size: 13px;
+}
+
+.portal-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.portal-star {
+  font-size: 16px;
+  color: #ddd;
+}
+
+.portal-star.filled {
+  color: #f5a623;
+}
+
+.portal-reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.portal-review-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.portal-review-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.portal-review-author {
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
+}
+
+.portal-review-comment {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.portal-review-reply {
+  background: rgba(124,106,247,0.06);
+  border: 1px solid rgba(124,106,247,0.15);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.portal-review-reply-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #7c6af7;
+  margin-bottom: 4px;
+}
+
+.portal-review-reply-text {
+  font-size: 13px;
+  margin: 0;
+}
+
+[data-theme="dark"] .portal-star { color: rgba(255,255,255,0.2); }
+[data-theme="dark"] .portal-star.filled { color: #f5a623; }
+[data-theme="dark"] .portal-review-author { color: rgba(255,255,255,0.5); }
+[data-theme="dark"] .portal-reviews-total { color: rgba(255,255,255,0.45); }

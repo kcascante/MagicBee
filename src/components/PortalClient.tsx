@@ -28,6 +28,19 @@ type ServiceItem = {
 
 type StaffItem = { id: string; full_name: string; avatar_url: string | null }
 
+type ReviewItem = {
+  id: string
+  rating: number
+  comment: string | null
+  admin_reply: string | null
+  admin_reply_at: string | null
+  created_at: string
+  client_name: string
+  service_name: string | null
+}
+
+type ReviewStats = { avg_rating: number; total: number }
+
 function fmtPrice(price: number) {
   return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(price)
 }
@@ -48,10 +61,14 @@ export default function PortalClient({
   organization,
   services,
   staff,
+  reviews,
+  reviewStats,
 }: {
   organization: Organization
   services: ServiceItem[]
   staff: StaffItem[]
+  reviews: ReviewItem[]
+  reviewStats: ReviewStats
 }) {
   const supabase = createClient()
   const accent = organization.primary_color || '#f5a623'
@@ -114,6 +131,44 @@ export default function PortalClient({
                 </div>
               </div>
             ))}
+          </section>
+        )}
+
+        {reviewStats.total > 0 && (
+          <section className="portal-reviews">
+            <div className="portal-reviews-header">
+              <h2>Opiniones de clientes</h2>
+              <div className="portal-reviews-summary">
+                <span className="portal-reviews-score">{reviewStats.avg_rating.toFixed(1)}</span>
+                <div className="portal-stars">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <span key={n} className={'portal-star' + (n <= Math.round(reviewStats.avg_rating) ? ' filled' : '')}>★</span>
+                  ))}
+                </div>
+                <span className="portal-reviews-total">{reviewStats.total} reseña{reviewStats.total === 1 ? '' : 's'}</span>
+              </div>
+            </div>
+            <div className="portal-reviews-grid">
+              {reviews.map((review) => (
+                <div key={review.id} className="portal-service-card portal-review-card">
+                  <div className="portal-review-top">
+                    <div className="portal-stars">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <span key={n} className={'portal-star' + (n <= review.rating ? ' filled' : '')}>★</span>
+                      ))}
+                    </div>
+                    <span className="portal-review-author">{review.client_name}</span>
+                  </div>
+                  {review.comment && <p className="portal-review-comment">{review.comment}</p>}
+                  {review.admin_reply && (
+                    <div className="portal-review-reply">
+                      <div className="portal-review-reply-label">Respuesta de {organization.name}</div>
+                      <p className="portal-review-reply-text">{review.admin_reply}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </section>
         )}
       </main>

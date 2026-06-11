@@ -15,6 +15,7 @@ const NAV = [
   { label: 'Clientes', href: '/dashboard/clients', active: false },
   { label: 'Horarios', href: '/dashboard/schedules', active: false },
   { label: 'Estadísticas', href: '/dashboard/stats', active: false },
+  { label: 'Reseñas', href: '/dashboard/reviews', active: false },
   { label: 'Configuración', href: '/dashboard/settings', active: false },
 ]
 

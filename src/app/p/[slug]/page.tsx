@@ -29,11 +29,17 @@ export default async function PublicPortalPage({ params }: { params: Promise<{ s
     staff = staffData ?? []
   }
 
+  const { data: reviews } = await supabase.rpc('get_organization_reviews', { p_slug: slug })
+  const { data: reviewStatsRows } = await supabase.rpc('get_organization_review_stats', { p_slug: slug })
+  const reviewStats = reviewStatsRows?.[0] ?? { avg_rating: 0, total: 0 }
+
   return (
     <PortalClient
       organization={org}
       services={services ?? []}
       staff={staff}
+      reviews={reviews ?? []}
+      reviewStats={reviewStats}
     />
   )
 }

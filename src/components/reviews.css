@@ -1,0 +1,215 @@
+/* ═══════════════════════════════════════════════
+   MAGICBEE — REVIEWS CSS
+═══════════════════════════════════════════════ */
+
+.rv-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.rv-star {
+  font-size: 16px;
+  line-height: 1;
+  color: rgba(255,255,255,0.2);
+}
+
+.rv-star.filled {
+  color: #f5a623;
+}
+
+[data-theme="light"] .rv-star {
+  color: #d8d8dc;
+}
+
+[data-theme="light"] .rv-star.filled {
+  color: #f5a623;
+}
+
+/* ─── Resumen ─── */
+.rv-summary {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+  background: rgba(20,15,40,0.35);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-top: 1px solid rgba(255,255,255,0.25);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.rv-summary-score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  padding-right: 24px;
+}
+
+.rv-summary-number {
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.rv-summary-score .rv-star {
+  font-size: 18px;
+}
+
+.rv-summary-total {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+}
+
+.rv-summary-bars {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+.rv-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+}
+
+.rv-summary-label {
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.rv-summary-track {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.rv-summary-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f5a623, #f56342);
+  border-radius: 999px;
+}
+
+.rv-summary-count {
+  width: 24px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+[data-theme="light"] .rv-summary {
+  background: #e8e8ec !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: 6px 6px 14px #c8c8cc, -5px -5px 12px #ffffff !important;
+}
+
+[data-theme="light"] .rv-summary-score {
+  border-right: 1px solid #d8d8dc;
+}
+
+[data-theme="light"] .rv-summary-total,
+[data-theme="light"] .rv-summary-row {
+  color: #888;
+}
+
+[data-theme="light"] .rv-summary-track {
+  background: #d8d8dc;
+}
+
+/* ─── Lista de reseñas ─── */
+.rv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rv-card {
+  gap: 12px;
+}
+
+.rv-hidden {
+  opacity: 0.6;
+}
+
+.rv-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.rv-client-name {
+  font-weight: 600;
+  font-size: 14px;
+  margin: 0 0 4px;
+}
+
+.rv-meta {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  margin: 0;
+}
+
+[data-theme="light"] .rv-meta {
+  color: #999;
+}
+
+.rv-comment {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+  color: rgba(255,255,255,0.8);
+}
+
+[data-theme="light"] .rv-comment {
+  color: #333;
+}
+
+.rv-reply-existing {
+  background: rgba(124,106,247,0.08);
+  border: 1px solid rgba(124,106,247,0.2);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.rv-reply-existing-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #7c6af7;
+}
+
+.rv-reply-existing-text {
+  font-size: 13px;
+  margin: 0;
+}
+
+.rv-reply-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rv-reply-box textarea {
+  resize: vertical;
+}
+
+.rv-card-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}

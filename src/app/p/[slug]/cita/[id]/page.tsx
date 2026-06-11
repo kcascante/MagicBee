@@ -26,5 +26,11 @@ export default async function CitaPage({ params }: { params: Promise<{ slug: str
 
   if (!org || org.slug !== slug) notFound()
 
-  return <CitaManageClient appointment={appt as any} organization={org as any} />
+  const { data: review } = await supabase
+    .from('reviews')
+    .select('id, rating, comment, admin_reply, admin_reply_at, created_at')
+    .eq('appointment_id', id)
+    .maybeSingle()
+
+  return <CitaManageClient appointment={appt as any} organization={org as any} existingReview={review as any} />
 }
