@@ -6,7 +6,7 @@ const HOURS = Array.from({ length: 15 }, (_, i) => i + 7) // 7..21
 const DAY_LABELS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
 function emptyPeriod() {
-  return { total: 0, attendanceRate: 0, cancellationRate: 0, revenue: 0, deltaTotal: 0, deltaRevenue: 0, topServices: [] as any[], topStaff: [] as any[] }
+  return { total: 0, completed: 0, cancelled: 0, noShow: 0, attendanceRate: 0, cancellationRate: 0, revenue: 0, deltaTotal: 0, deltaRevenue: 0, topServices: [] as any[], topStaff: [] as any[] }
 }
 
 export default async function StatsPage() {
@@ -140,7 +140,7 @@ export default async function StatsPage() {
     const cancellationRate = denom > 0 ? Math.round((cur.cancelled / denom) * 100) : 0
     const deltaTotal = prev.total > 0 ? Math.round(((cur.total - prev.total) / prev.total) * 100) : (cur.total > 0 ? 100 : 0)
     const deltaRevenue = prev.revenue > 0 ? Math.round(((cur.revenue - prev.revenue) / prev.revenue) * 100) : (cur.revenue > 0 ? 100 : 0)
-    return { total: cur.total, attendanceRate, cancellationRate, revenue: cur.revenue, deltaTotal, deltaRevenue, topServices: topN(cur.services, 5), topStaff: topN(cur.staff, 5) }
+    return { total: cur.total, completed: cur.completed, cancelled: cur.cancelled, noShow: cur.noShow, attendanceRate, cancellationRate, revenue: cur.revenue, deltaTotal, deltaRevenue, topServices: topN(cur.services, 5), topStaff: topN(cur.staff, 5) }
   }
 
   const clientVisits: Record<string, { name: string; visits: number; lastVisit: string }> = {}

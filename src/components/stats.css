@@ -174,3 +174,15 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.stat-gauge {
+  width: 64px;
+  height: 64px;
+  margin: 8px auto 0;
+}
+
+.stat-chart-wrap {
+  position: relative;
+  width: 100%;
+}

@@ -3,10 +3,22 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import {
+  Chart as ChartJS,
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+} from 'chart.js'
+import { Doughnut, Bar } from 'react-chartjs-2'
 import '@/components/auth.css'
 import './dashboard.css'
 import './clients.css'
 import './stats.css'
+
+ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend)
 
 const NAV = [
   { label: 'Panel', href: '/dashboard', active: false },
@@ -21,11 +33,15 @@ const NAV = [
 
 const SEGMENT_LABELS: Record<string, string> = { nuevo: 'Nuevos', regular: 'Regulares', en_riesgo: 'En riesgo', vip: 'VIP', sin_citas: 'Sin citas' }
 const SEGMENT_COLORS: Record<string, string> = { nuevo: '#22d3a5', regular: '#f5a623', en_riesgo: '#f56342', vip: '#7c6af7', sin_citas: '#888888' }
-
 const PERIOD_LABELS: Record<string, string> = { today: 'Hoy', week: 'Esta semana', month: 'Este mes' }
+const AXIS_COLOR = '#888888'
+const GRID_COLOR = 'rgba(150,150,150,0.12)'
 
 type PeriodResult = {
   total: number
+  completed: number
+  cancelled: number
+  noShow: number
   attendanceRate: number
   cancellationRate: number
   revenue: number
@@ -52,6 +68,50 @@ function formatDelta(value: number) {
   if (value === 0) return <span className="stat-delta neutral">sin cambio</span>
   const positive = value > 0
   return <span className={"stat-delta " + (positive ? "up" : "down")}>{positive ? '▲' : '▼'} {Math.abs(value)}% vs período anterior</span>
+}
+
+function Gauge({ value, color }: { value: number; color: string }) {
+  const data = {
+    datasets: [{
+      data: [value, Math.max(0, 100 - value)],
+      backgroundColor: [color, 'rgba(150,150,150,0.15)'],
+      borderWidth: 0,
+    }],
+  }
+  const options: any = {
+    cutout: '78%',
+    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+    animation: { animateRotate: true, duration: 900 },
+    maintainAspectRatio: false,
+  }
+  return <div className="stat-gauge"><Doughnut data={data} options={options} /></div>
+}
+
+function RankBarChart({ items, valueKey, color, valueLabel }: { items: any[]; valueKey: string; color: string; valueLabel: (item: any) => string }) {
+  const data = {
+    labels: items.map((i) => i.name),
+    datasets: [{ data: items.map((i) => i[valueKey]), backgroundColor: color, borderRadius: 6, maxBarThickness: 28 }],
+  }
+  const options: any = {
+    indexAxis: 'y',
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (ctx: any) => valueLabel(items[ctx.dataIndex]) } },
+    },
+    scales: {
+      x: { beginAtZero: true, ticks: { precision: 0, color: AXIS_COLOR }, grid: { color: GRID_COLOR } },
+      y: { ticks: { color: AXIS_COLOR, font: { size: 12 } }, grid: { display: false } },
+    },
+    animation: { duration: 900 },
+    maintainAspectRatio: false,
+  }
+  return <div className="stat-chart-wrap" style={{ height: Math.max(140, items.length * 44) }}><Bar data={data} options={options} /></div>
+}
+
+const doughnutOptions: any = {
+  plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 11 }, color: AXIS_COLOR } } },
+  animation: { animateScale: true, animateRotate: true, duration: 900 },
+  maintainAspectRatio: false,
 }
 
 export default function StatsClient({ userData, stats }: { userData: UserData | null; stats: StatsData }) {
@@ -82,8 +142,23 @@ export default function StatsClient({ userData, stats }: { userData: UserData | 
   const firstName = userData?.full_name?.split(' ')[0] ?? 'Admin'
   const data = stats.periods[period]
 
-  const maxServiceCount = Math.max(1, ...data.topServices.map((s) => s.count))
-  const maxStaffCount = Math.max(1, ...data.topStaff.map((s) => s.count))
+  const statusEntries = [
+    { label: 'Completadas', value: data.completed, color: '#22d3a5' },
+    { label: 'Pendientes/confirmadas', value: Math.max(0, data.total - data.completed - data.noShow), color: '#7c6af7' },
+    { label: 'No asistió', value: data.noShow, color: '#f56342' },
+    { label: 'Canceladas', value: data.cancelled, color: '#888888' },
+  ].filter((s) => s.value > 0)
+
+  const statusData = {
+    labels: statusEntries.map((s) => s.label),
+    datasets: [{ data: statusEntries.map((s) => s.value), backgroundColor: statusEntries.map((s) => s.color), borderWidth: 0 }],
+  }
+
+  const segEntries = Object.entries(stats.segmentCounts).filter(([, v]) => v > 0)
+  const segData = {
+    labels: segEntries.map(([k]) => SEGMENT_LABELS[k]),
+    datasets: [{ data: segEntries.map(([, v]) => v), backgroundColor: segEntries.map(([k]) => SEGMENT_COLORS[k]), borderWidth: 0 }],
+  }
 
   return (
     <div className="db-root">
@@ -147,14 +222,14 @@ export default function StatsClient({ userData, stats }: { userData: UserData | 
             <div className="db-card-dot" style={{ background: '#22d3a5', boxShadow: '0 0 8px #22d3a5' }} />
             <p className="db-card-label">Tasa de asistencia</p>
             <p className="db-card-value">{data.attendanceRate}%</p>
-            <div className="stat-progress"><div className="stat-progress-fill" style={{ width: `${data.attendanceRate}%`, background: '#22d3a5' }} /></div>
+            <Gauge value={data.attendanceRate} color="#22d3a5" />
           </div>
 
           <div className="db-card">
             <div className="db-card-dot" style={{ background: data.cancellationRate > 20 ? '#f56342' : '#7c6af7', boxShadow: `0 0 8px ${data.cancellationRate > 20 ? '#f56342' : '#7c6af7'}` }} />
             <p className="db-card-label">Tasa de cancelación</p>
             <p className="db-card-value" style={{ color: data.cancellationRate > 20 ? '#f56342' : undefined }}>{data.cancellationRate}%</p>
-            <div className="stat-progress"><div className="stat-progress-fill" style={{ width: `${data.cancellationRate}%`, background: data.cancellationRate > 20 ? '#f56342' : '#7c6af7' }} /></div>
+            <Gauge value={data.cancellationRate} color={data.cancellationRate > 20 ? '#f56342' : '#7c6af7'} />
           </div>
 
           <div className="db-card">
@@ -171,20 +246,7 @@ export default function StatsClient({ userData, stats }: { userData: UserData | 
             {data.topServices.length === 0 ? (
               <p className="cl-empty-history">Sin citas completadas en este período.</p>
             ) : (
-              <div className="stat-rank-list">
-                {data.topServices.map((s, i) => (
-                  <div key={s.name} className="stat-rank-row">
-                    <span className="stat-rank-pos">{i + 1}</span>
-                    <div className="stat-rank-info">
-                      <div className="stat-rank-top">
-                        <span className="stat-rank-name">{s.name}</span>
-                        <span className="stat-rank-meta">{s.count} citas · {formatCurrency(s.revenue)}</span>
-                      </div>
-                      <div className="stat-progress"><div className="stat-progress-fill" style={{ width: `${(s.count / maxServiceCount) * 100}%`, background: '#7c6af7' }} /></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <RankBarChart items={data.topServices} valueKey="count" color="#7c6af7" valueLabel={(i) => `${i.count} citas · ${formatCurrency(i.revenue)}`} />
             )}
           </div>
 
@@ -193,63 +255,39 @@ export default function StatsClient({ userData, stats }: { userData: UserData | 
             {data.topStaff.length === 0 ? (
               <p className="cl-empty-history">Sin citas completadas en este período.</p>
             ) : (
-              <div className="stat-rank-list">
-                {data.topStaff.map((s, i) => (
-                  <div key={s.name} className="stat-rank-row">
-                    <span className="stat-rank-pos">{i + 1}</span>
-                    <div className="stat-rank-info">
-                      <div className="stat-rank-top">
-                        <span className="stat-rank-name">{s.name}</span>
-                        <span className="stat-rank-meta">
-                          {s.count} citas · {formatCurrency(s.revenue)}
-                          {s.cancelled ? ` · ${s.cancelled} canceladas` : ''}
-                        </span>
-                      </div>
-                      <div className="stat-progress"><div className="stat-progress-fill" style={{ width: `${(s.count / maxStaffCount) * 100}%`, background: '#f5a623' }} /></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <RankBarChart items={data.topStaff} valueKey="count" color="#f5a623" valueLabel={(i) => `${i.count} citas · ${formatCurrency(i.revenue)}${i.cancelled ? ' · ' + i.cancelled + ' canceladas' : ''}`} />
             )}
           </div>
         </div>
 
         <div className="stat-grid">
           <div className="mi-card stat-section">
-            <h2 className="stat-section-title">Clientes frecuentes</h2>
-            <p className="cl-empty-history" style={{ marginBottom: 12 }}>Top 10 por visitas en los últimos 90 días.</p>
-            {stats.topClients.length === 0 ? (
-              <p className="cl-empty-history">Todavía no hay citas completadas.</p>
+            <h2 className="stat-section-title">Estado de las citas</h2>
+            {statusEntries.length === 0 ? (
+              <p className="cl-empty-history">Sin citas en este período.</p>
             ) : (
-              <div className="stat-rank-list">
-                {stats.topClients.map((c, i) => (
-                  <div key={c.name + i} className="stat-rank-row">
-                    <span className="stat-rank-pos">{i + 1}</span>
-                    <div className="stat-rank-info">
-                      <div className="stat-rank-top">
-                        <span className="stat-rank-name">{c.name}</span>
-                        <span className="stat-rank-meta">{c.visits} visitas</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <div className="stat-chart-wrap" style={{ height: 220 }}><Doughnut data={statusData} options={doughnutOptions} /></div>
             )}
           </div>
 
           <div className="mi-card stat-section">
             <h2 className="stat-section-title">Segmentos de clientes</h2>
-            <div className="stat-segment-list">
-              {Object.entries(stats.segmentCounts).map(([key, count]) => (
-                <div key={key} className="stat-segment-row">
-                  <span className="cl-segment-badge" style={{ color: SEGMENT_COLORS[key], border: `1px solid ${SEGMENT_COLORS[key]}55` }}>
-                    {SEGMENT_LABELS[key]}
-                  </span>
-                  <span className="stat-segment-count">{count}</span>
-                </div>
-              ))}
-            </div>
+            {segEntries.length === 0 ? (
+              <p className="cl-empty-history">Todavía no hay clientes clasificados.</p>
+            ) : (
+              <div className="stat-chart-wrap" style={{ height: 220 }}><Doughnut data={segData} options={doughnutOptions} /></div>
+            )}
           </div>
+        </div>
+
+        <div className="mi-card stat-section">
+          <h2 className="stat-section-title">Clientes frecuentes</h2>
+          <p className="cl-empty-history" style={{ marginBottom: 12 }}>Top 10 por visitas en los últimos 90 días.</p>
+          {stats.topClients.length === 0 ? (
+            <p className="cl-empty-history">Todavía no hay citas completadas.</p>
+          ) : (
+            <RankBarChart items={stats.topClients} valueKey="visits" color="#22d3a5" valueLabel={(i) => `${i.visits} visitas`} />
+          )}
         </div>
 
         <div className="mi-card stat-section">
