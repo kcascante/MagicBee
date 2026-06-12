@@ -280,18 +280,25 @@ async function toolCancelAppointment(ctx: ToolContext, input: any) {
 }
 
 async function executeTool(name: string, input: any, ctx: ToolContext) {
+  let result: any
   switch (name) {
     case 'check_availability':
-      return toolCheckAvailability(ctx, input)
+      result = await toolCheckAvailability(ctx, input)
+      break
     case 'book_appointment':
-      return toolBookAppointment(ctx, input)
+      result = await toolBookAppointment(ctx, input)
+      break
     case 'list_my_appointments':
-      return toolListMyAppointments(ctx)
+      result = await toolListMyAppointments(ctx)
+      break
     case 'cancel_appointment':
-      return toolCancelAppointment(ctx, input)
+      result = await toolCancelAppointment(ctx, input)
+      break
     default:
-      return { error: 'unknown_tool' }
+      result = { error: 'unknown_tool' }
   }
+  console.log(`[whatsapp-bot] tool=${name} input=${JSON.stringify(input)} result=${JSON.stringify(result)}`)
+  return result
 }
 
 async function callClaude(system: string, messages: any[]) {
@@ -352,6 +359,7 @@ export async function runWhatsAppBot(opts: {
 
     if (toolUses.length === 0) {
       const text = textBlocks.map((b) => b.text).join('\n').trim()
+      console.log(`[whatsapp-bot] iteration=${i} no_tool_used final_reply=${JSON.stringify(text)}`)
       return text || 'Disculpá, no entendí bien eso. ¿Podrías repetirlo?'
     }
 
