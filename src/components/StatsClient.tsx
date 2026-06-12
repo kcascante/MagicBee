@@ -29,6 +29,7 @@ const NAV = [
   { label: 'Horarios', href: '/dashboard/schedules', active: false },
   { label: 'Estadísticas', href: '/dashboard/stats', active: true },
   { label: 'Reseñas', href: '/dashboard/reviews', active: false },
+  { label: 'Promociones', href: '/dashboard/promotions', active: false },
   { label: 'Configuración', href: '/dashboard/settings', active: false },
 ]
 
