@@ -67,6 +67,8 @@ type Organization = {
   plan_status: string | null
   plan_expires_at: string | null
   cancellation_window_hours: number | null
+  whatsapp_phone_number_id: string | null
+  whatsapp_access_token: string | null
 }
 
 type UserData = { full_name: string; organizations: Organization }
@@ -101,6 +103,8 @@ export default function SettingsClient({ userData, organization }: { userData: U
     primary_color: organization?.primary_color ?? '#f5a623',
     slug: organization?.slug ?? '',
     cancellation_window_hours: organization?.cancellation_window_hours ?? 2,
+    whatsapp_phone_number_id: organization?.whatsapp_phone_number_id ?? '',
+    whatsapp_access_token: organization?.whatsapp_access_token ?? '',
   })
 
   const [logoUrl, setLogoUrl] = useState<string | null>(organization?.logo_url ?? null)
@@ -230,7 +234,12 @@ export default function SettingsClient({ userData, organization }: { userData: U
 
     const { error: updateError } = await supabase
       .from('organizations')
-      .update({ name, phone: phone || null, email: email || null, address: address || null, timezone: form.timezone, primary_color, slug, cancellation_window_hours: cancellationWindow })
+      .update({
+        name, phone: phone || null, email: email || null, address: address || null,
+        timezone: form.timezone, primary_color, slug, cancellation_window_hours: cancellationWindow,
+        whatsapp_phone_number_id: form.whatsapp_phone_number_id.trim() || null,
+        whatsapp_access_token: form.whatsapp_access_token.trim() || null,
+      })
       .eq('id', organization.id)
 
     if (updateError) {
@@ -409,6 +418,62 @@ export default function SettingsClient({ userData, organization }: { userData: U
                   </div>
                 )}
               </div>
+
+              {organization && (
+                <div className="mi-card set-section">
+                  <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>WhatsApp</h2>
+                  <p className="cl-empty-history" style={{ marginBottom: 16 }}>
+                    Conectá tu número de WhatsApp Business para que tus clientes puedan agendar, consultar y cancelar citas por chat.
+                  </p>
+
+                  <div className="auth-field">
+                    <label>Webhook URL (configurala en Meta &gt; Configuración de la API)</label>
+                    <div className="set-portal-link">
+                      <a href="#" onClick={(e) => e.preventDefault()}>{typeof window !== 'undefined' ? `${window.location.origin}/api/whatsapp/webhook` : '/api/whatsapp/webhook'}</a>
+                      <button
+                        type="button"
+                        className="db-action-btn"
+                        style={{ color: '#22d3a5', border: '1px solid rgba(34,211,165,0.3)' }}
+                        onClick={() => navigator.clipboard.writeText(`${window.location.origin}/api/whatsapp/webhook`)}
+                      >
+                        Copiar
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="auth-field">
+                    <label>Identificador del número de teléfono (Phone Number ID)</label>
+                    <input
+                      className="auth-input"
+                      type="text"
+                      value={form.whatsapp_phone_number_id}
+                      onChange={(e) => setForm({ ...form, whatsapp_phone_number_id: e.target.value })}
+                      placeholder="107677746...282"
+                      autoComplete="off"
+                      spellCheck={false}
+                      maxLength={64}
+                    />
+                  </div>
+
+                  <div className="auth-field">
+                    <label>Token de acceso (Access Token)</label>
+                    <input
+                      className="auth-input"
+                      type="password"
+                      value={form.whatsapp_access_token}
+                      onChange={(e) => setForm({ ...form, whatsapp_access_token: e.target.value })}
+                      placeholder="EAAG..."
+                      autoComplete="off"
+                      spellCheck={false}
+                      maxLength={512}
+                    />
+                  </div>
+
+                  <p className="cl-empty-history" style={{ marginTop: 6 }}>
+                    El token de prueba de Meta vence cada 24h; cuando lo renueves, actualizalo aquí.
+                  </p>
+                </div>
+              )}
 
               {organization && (
                 <div className="mi-card set-section">
