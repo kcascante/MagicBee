@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { sendWhatsAppMessage } from '@/lib/whatsapp'
+import { runWhatsAppBot, type ChatMessage } from '@/lib/whatsappBot'
 
 /**
  * Verificacion del webhook por parte de Meta.
@@ -45,7 +46,6 @@ export async function POST(req: Request) {
 
     const from: string = message.from
     const text: string = message.text?.body ?? ''
-    const contactName: string = value?.contacts?.[0]?.profile?.name ?? ''
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
 
     const { data: org } = await supabase
       .from('organizations')
-      .select('id, name, whatsapp_access_token')
+      .select('id, name, timezone, cancellation_window_hours, whatsapp_access_token')
       .eq('whatsapp_phone_number_id', phoneNumberId)
       .maybeSingle()
 
@@ -63,7 +63,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true })
     }
 
-    // Guardar el mensaje entrante en la sesion de conversacion (historial para la IA)
+    const { data: services } = await supabase
+      .from('services')
+      .select('id, name, description, duration_minutes, price')
+      .eq('organization_id', org.id)
+      .eq('is_active', true)
+
+    // Cargar/crear la sesion de conversacion (historial para darle contexto a la IA)
     const { data: session } = await supabase
       .from('whatsapp_sessions')
       .select('id, messages')
@@ -71,15 +77,35 @@ export async function POST(req: Request) {
       .eq('phone_number', from)
       .maybeSingle()
 
-    const incomingEntry = { role: 'user', content: text, at: new Date().toISOString() }
-    const replyText = `¡Hola${contactName ? ' ' + contactName.split(' ')[0] : ''}! Soy el asistente de ${org.name}. Recibimos tu mensaje: "${text}". Muy pronto voy a poder ayudarte a agendar, consultar o cancelar tu cita por aquí.`
-    const outgoingEntry = { role: 'assistant', content: replyText, at: new Date().toISOString() }
+    const history: ChatMessage[] = Array.isArray(session?.messages)
+      ? session.messages.filter((m: any) => m?.role === 'user' || m?.role === 'assistant').map((m: any) => ({ role: m.role, content: String(m.content ?? '') }))
+      : []
+
+    let replyText: string
+    try {
+      replyText = await runWhatsAppBot({
+        supabase,
+        org,
+        services: services ?? [],
+        fromPhone: from,
+        history,
+        userMessage: text,
+      })
+    } catch (err) {
+      console.error('whatsapp bot error', err)
+      replyText = `¡Hola! Soy el asistente de ${org.name}. En este momento no puedo procesar tu mensaje, pero el equipo lo va a revisar pronto.`
+    }
+
+    const updatedMessages = [
+      ...history,
+      { role: 'user', content: text },
+      { role: 'assistant', content: replyText },
+    ]
 
     if (session) {
-      const messages = Array.isArray(session.messages) ? session.messages : []
       await supabase
         .from('whatsapp_sessions')
-        .update({ messages: [...messages, incomingEntry, outgoingEntry] })
+        .update({ messages: updatedMessages })
         .eq('id', session.id)
     } else {
       await supabase
@@ -87,7 +113,7 @@ export async function POST(req: Request) {
         .insert({
           organization_id: org.id,
           phone_number: from,
-          messages: [incomingEntry, outgoingEntry],
+          messages: updatedMessages,
         })
     }
 
