@@ -3,6 +3,21 @@ import { Resend } from 'resend'
 
 const FROM = 'MagicBee <notificaciones@magicbee.bond>'
 
+/**
+ * Envia un correo via Resend si RESEND_API_KEY esta configurada; si no,
+ * omite el envio sin fallar. Esto permite que el resto de una notificacion
+ * (ej. el aviso de resena por WhatsApp) se ejecute aunque el correo no este
+ * configurado.
+ */
+async function sendEmail(payload: { from: string; to: string; subject: string; html: string }) {
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY no configurada, omitiendo envio de correo')
+    return { skipped: true }
+  }
+  const resend = new Resend(process.env.RESEND_API_KEY)
+  return resend.emails.send(payload)
+}
+
 function fmtDateTime(iso: string, timezone: string) {
   const d = new Date(iso)
   const date = d.toLocaleDateString('es-CR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: timezone })
@@ -43,12 +58,6 @@ function manageButton(accent: string, manageUrl: string, label: string) {
 export type AppointmentEmailEvent = 'created' | 'status_update' | 'cancelled_by_client'
 
 export async function sendAppointmentNotification(appointmentId: string, event: AppointmentEmailEvent) {
-  if (!process.env.RESEND_API_KEY) {
-    console.warn('RESEND_API_KEY no configurada, omitiendo envio de notificaciones')
-    return { skipped: true }
-  }
-
-  const resend = new Resend(process.env.RESEND_API_KEY)
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -108,7 +117,7 @@ export async function sendAppointmentNotification(appointmentId: string, event: 
        ${detailsTable(adminRows)}
        <a href="${dashboardUrl}" style="display: block; text-align: center; background: ${accent}; color: #fff; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: 600;">Ver en el panel</a>`
     )
-    results.admin = await resend.emails.send({
+    results.admin = await sendEmail({
       from: FROM,
       to: org.email,
       subject: `Cita cancelada por el cliente: ${client?.full_name ?? 'Cliente'}`,
@@ -131,7 +140,7 @@ export async function sendAppointmentNotification(appointmentId: string, event: 
          ${org.phone ? `<p style="color: #888; font-size: 13px; margin-top: 12px;">¿Necesitás cambiar algo? Contactá al negocio: ${org.phone}</p>` : ''}
          <p style="color: #aaa; font-size: 12px; margin-top: 24px;">Enviado por MagicBee en nombre de ${org.name}.</p>`
       )
-      results.client = await resend.emails.send({
+      results.client = await sendEmail({
         from: FROM,
         to: client.email,
         subject: `Tu cita en ${org.name} fue confirmada`,
@@ -148,7 +157,7 @@ export async function sendAppointmentNotification(appointmentId: string, event: 
            ${manageButton(accent, manageUrl, 'Calificar mi experiencia')}
            <p style="color: #aaa; font-size: 12px; margin-top: 24px;">Enviado por MagicBee en nombre de ${org.name}.</p>`
         )
-        results.client = await resend.emails.send({
+        results.client = await sendEmail({
           from: FROM,
           to: client.email,
           subject: `¿Cómo fue tu experiencia en ${org.name}?`,
@@ -166,9 +175,16 @@ export async function sendAppointmentNotification(appointmentId: string, event: 
             client.phone,
             `¡Gracias por tu visita a ${org.name}! Nos encantaría conocer tu opinión, podés dejarnos tu reseña aquí: ${manageUrl}`
           )
+          console.log('[whatsapp-review] enviado a', client.phone)
         } catch (err) {
-          console.error('whatsapp review request failed', err)
+          console.error('[whatsapp-review] fallo el envio', err)
         }
+      } else {
+        console.log('[whatsapp-review] omitido', {
+          booked_via: appt.booked_via,
+          has_phone: !!client?.phone,
+          has_wa_config: !!(org.whatsapp_phone_number_id && org.whatsapp_access_token),
+        })
       }
     } else if (appt.status === 'cancelled') {
       const html = wrapper(
@@ -180,7 +196,7 @@ export async function sendAppointmentNotification(appointmentId: string, event: 
          ${manageButton(accent, portalUrl, 'Agendar otra cita')}
          <p style="color: #aaa; font-size: 12px; margin-top: 24px;">Enviado por MagicBee en nombre de ${org.name}.</p>`
       )
-      results.client = await resend.emails.send({
+      results.client = await sendEmail({
         from: FROM,
         to: client.email,
         subject: `Tu cita en ${org.name} fue cancelada`,
@@ -205,7 +221,7 @@ export async function sendAppointmentNotification(appointmentId: string, event: 
        ${org.phone ? `<p style="color: #888; font-size: 13px; margin-top: 12px;">¿Necesitás cambiar algo? Contactá al negocio: ${org.phone}</p>` : ''}
        <p style="color: #aaa; font-size: 12px; margin-top: 24px;">Enviado por MagicBee en nombre de ${org.name}.</p>`
     )
-    results.client = await resend.emails.send({
+    results.client = await sendEmail({
       from: FROM,
       to: client.email,
       subject: `Tu cita en ${org.name} fue solicitada`,
@@ -226,7 +242,7 @@ export async function sendAppointmentNotification(appointmentId: string, event: 
        ${detailsTable(adminRows)}
        <a href="${dashboardUrl}" style="display: block; text-align: center; background: ${accent}; color: #fff; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: 600;">Ver en el panel</a>`
     )
-    results.admin = await resend.emails.send({
+    results.admin = await sendEmail({
       from: FROM,
       to: org.email,
       subject: `Nueva cita: ${client?.full_name ?? 'Cliente'} · ${service?.name ?? ''}`,
