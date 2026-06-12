@@ -134,10 +134,10 @@ export default function PortalClient({
           </section>
         )}
 
-        {reviewStats.total > 0 && (
-          <section className="portal-reviews">
-            <div className="portal-reviews-header">
-              <h2>Opiniones de clientes</h2>
+        <section className="portal-reviews">
+          <div className="portal-reviews-header">
+            <h2>Opiniones de clientes</h2>
+            {reviewStats.total > 0 && (
               <div className="portal-reviews-summary">
                 <span className="portal-reviews-score">{reviewStats.avg_rating.toFixed(1)}</span>
                 <div className="portal-stars">
@@ -147,7 +147,12 @@ export default function PortalClient({
                 </div>
                 <span className="portal-reviews-total">{reviewStats.total} reseña{reviewStats.total === 1 ? '' : 's'}</span>
               </div>
-            </div>
+            )}
+          </div>
+
+          {reviewStats.total === 0 ? (
+            <p className="portal-reviews-empty">Todavía no hay reseñas. ¡Sé el primero en compartir tu experiencia después de tu cita!</p>
+          ) : (
             <div className="portal-reviews-grid">
               {reviews.map((review) => (
                 <div key={review.id} className="portal-service-card portal-review-card">
@@ -169,8 +174,8 @@ export default function PortalClient({
                 </div>
               ))}
             </div>
-          </section>
-        )}
+          )}
+        </section>
       </main>
 
       <footer className="portal-footer">

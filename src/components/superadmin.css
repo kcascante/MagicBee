@@ -1,6 +1,8 @@
 .sa-root {
   min-height: 100vh;
-  background: linear-gradient(160deg, #0d2547 0%, #040810 100%); /* MB-NAVY-BG-V2 */
+  background:
+    url('/images/dark-bg.svg') center / cover no-repeat,
+    linear-gradient(160deg, #0d2547 0%, #040810 100%); /* MB-NAVY-BG-IMAGE-V1 */
   color: #fff;
   font-family: Inter, system-ui, sans-serif;
   padding: 40px;

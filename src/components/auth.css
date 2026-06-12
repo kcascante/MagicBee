@@ -2,7 +2,9 @@
   min-height: 100vh;
   display: flex;
   font-family: Inter, system-ui, sans-serif;
-  background: linear-gradient(135deg, #0d2547 0%, #102d5c 50%, #040810 100%) /* MB-NAVY-BG-V2 */;
+  background:
+    url('/images/dark-bg.svg') center / cover no-repeat,
+    linear-gradient(135deg, #0d2547 0%, #102d5c 50%, #040810 100%); /* MB-NAVY-BG-IMAGE-V1 */
 }
 
 .auth-left {

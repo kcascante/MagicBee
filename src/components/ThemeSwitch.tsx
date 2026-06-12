@@ -1,10 +1,19 @@
 'use client'
 
 import { useTheme } from '@/lib/theme'
+import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
 export function ThemeSwitch() {
   const { theme, toggle } = useTheme()
+  const pathname = usePathname()
+
+  // La pagina de gestion de cita (/p/[slug]/cita/[id]) no usa
+  // cambio de tema: siempre se muestra en claro.
+  if (pathname && /^\/p\/[^/]+\/cita\//.test(pathname)) {
+    return null
+  }
+
   return (
     <button
       onClick={toggle}

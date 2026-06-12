@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d2547"/>
+      <stop offset="100%" stop-color="#040810"/>
+    </linearGradient>
+    <filter id="blur1" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="90"/>
+    </filter>
+    <filter id="blur2" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="70"/>
+    </filter>
+    <filter id="blur3" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="110"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+
+  <!-- circulo purpura, superior izquierda -->
+  <circle cx="220" cy="150" r="260" fill="#7c6af7" opacity="0.30" filter="url(#blur1)"/>
+
+  <!-- circulo ambar, superior derecha -->
+  <circle cx="1360" cy="120" r="300" fill="#f5a623" opacity="0.26" filter="url(#blur3)"/>
+
+  <!-- circulo teal, inferior izquierda -->
+  <circle cx="120" cy="900" r="280" fill="#22d3a5" opacity="0.22" filter="url(#blur2)"/>
+
+  <!-- circulo naranja, inferior derecha -->
+  <circle cx="1480" cy="880" r="320" fill="#f56342" opacity="0.22" filter="url(#blur3)"/>
+
+  <!-- circulo purpura suave, centro -->
+  <circle cx="820" cy="520" r="380" fill="#7c6af7" opacity="0.12" filter="url(#blur3)"/>
+
+  <!-- acento ambar pequeno, centro-derecha -->
+  <circle cx="1100" cy="620" r="160" fill="#f5a623" opacity="0.16" filter="url(#blur1)"/>
+</svg>
