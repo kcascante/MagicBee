@@ -33,7 +33,6 @@ export type ScheduleRow = {
   end_time: string
   break_start: string | null
   break_end: string | null
-  has_break: boolean
   is_active: boolean
 }
 
@@ -50,7 +49,7 @@ function formatSchedule(schedules: ScheduleRow[]): string {
     const name = DAY_NAMES[dayIndex]
     if (!row || !row.is_active) {
       lines.push(`${name}: cerrado`)
-    } else if (row.has_break && row.break_start && row.break_end) {
+    } else if (row.break_start && row.break_end) {
       lines.push(`${name}: ${row.start_time.slice(0, 5)}–${row.break_start.slice(0, 5)} y ${row.break_end.slice(0, 5)}–${row.end_time.slice(0, 5)}`)
     } else {
       lines.push(`${name}: ${row.start_time.slice(0, 5)}–${row.end_time.slice(0, 5)}`)

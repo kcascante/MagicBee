@@ -80,7 +80,7 @@ export async function POST(req: Request) {
 
     const { data: schedules } = await supabase
       .from('schedules')
-      .select('day_of_week, start_time, end_time, break_start, break_end, has_break, is_active')
+      .select('day_of_week, start_time, end_time, break_start, break_end, is_active')
       .eq('organization_id', org.id)
       .is('staff_id', null)
 
