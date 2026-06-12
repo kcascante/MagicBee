@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { sendWhatsAppMessage } from '@/lib/whatsapp'
-import { runWhatsAppBot, type ChatMessage } from '@/lib/whatsappBot'
+import { runWhatsAppBot, type ChatMessage, type ScheduleRow } from '@/lib/whatsappBot'
 
 /**
  * Verificacion del webhook por parte de Meta.
@@ -38,6 +38,15 @@ export async function POST(req: Request) {
 
     const phoneNumberId: string | undefined = value?.metadata?.phone_number_id
     const message = value?.messages?.[0]
+    const statuses = value?.statuses
+
+    // Los "statuses" reportan el resultado real de entrega de mensajes salientes
+    // (sent/delivered/read/failed), incluyendo las imagenes de show_services.
+    if (Array.isArray(statuses) && statuses.length > 0) {
+      for (const s of statuses) {
+        console.log(`[whatsapp-status] id=${s.id} status=${s.status} recipient=${s.recipient_id}${s.errors ? ' errors=' + JSON.stringify(s.errors) : ''}`)
+      }
+    }
 
     // Ignorar webhooks que no son mensajes entrantes (ej. status updates: sent/delivered/read)
     if (!phoneNumberId || !message) {
@@ -69,6 +78,12 @@ export async function POST(req: Request) {
       .eq('organization_id', org.id)
       .eq('is_active', true)
 
+    const { data: schedules } = await supabase
+      .from('schedules')
+      .select('day_of_week, start_time, end_time, break_start, break_end, has_break, is_active')
+      .eq('organization_id', org.id)
+      .is('staff_id', null)
+
     // Cargar/crear la sesion de conversacion (historial para darle contexto a la IA)
     const { data: session } = await supabase
       .from('whatsapp_sessions')
@@ -87,6 +102,7 @@ export async function POST(req: Request) {
         supabase,
         org,
         services: services ?? [],
+        schedules: (schedules ?? []) as ScheduleRow[],
         fromPhone: from,
         history,
         userMessage: text,
