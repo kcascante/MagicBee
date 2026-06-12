@@ -82,8 +82,8 @@ function apptDateStr(iso: string) {
   return fmtDateInput(new Date(iso))
 }
 
-function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit', hour12: false })
+function fmtTime(iso: string, tz: string) {
+  return new Date(iso).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz })
 }
 
 function fmtPrice(price: number) {
@@ -93,6 +93,7 @@ function fmtPrice(price: number) {
 export default function AppointmentsClient({
   userData,
   organizationId,
+  timezone,
   requiresStaffSelection,
   initialAppointments,
   initialWeekStart,
@@ -101,6 +102,7 @@ export default function AppointmentsClient({
 }: {
   userData: UserData | null
   organizationId: string
+  timezone: string
   requiresStaffSelection: boolean
   initialAppointments: Appointment[]
   initialWeekStart: string
@@ -427,8 +429,8 @@ export default function AppointmentsClient({
               onClick={() => setSelectedAppt(appt)}
             >
               <div className="apt-list-time">
-                <span>{fmtTime(appt.start_time)}</span>
-                <span className="apt-list-time-end">{fmtTime(appt.end_time)}</span>
+                <span>{fmtTime(appt.start_time, timezone)}</span>
+                <span className="apt-list-time-end">{fmtTime(appt.end_time, timezone)}</span>
               </div>
               <div className="apt-list-info">
                 <span className="apt-list-name">{appt.clients?.full_name ?? 'Cliente'}</span>
@@ -500,7 +502,7 @@ export default function AppointmentsClient({
                       style={{ top, height, left: `${leftPct}%`, width: `calc(${widthPct}% - 2px)`, borderLeftColor: color, background: color + '22' }}
                       onClick={() => setSelectedAppt(appt)}
                     >
-                      <span className="apt-block-time">{fmtTime(appt.start_time)}</span>
+                      <span className="apt-block-time">{fmtTime(appt.start_time, timezone)}</span>
                       <span className="apt-block-name">{appt.clients?.full_name ?? 'Cliente'}</span>
                       <span className="apt-block-service">{appt.services?.name}{appt.staff ? ` \u00b7 ${appt.staff.full_name}` : ''}</span>
                     </button>
@@ -681,6 +683,7 @@ export default function AppointmentsClient({
       {selectedAppt && (
         <AppointmentDetailModal
           appt={selectedAppt}
+          timezone={timezone}
           onClose={() => setSelectedAppt(null)}
           onUpdateStatus={updateStatus}
         />
@@ -703,10 +706,12 @@ export default function AppointmentsClient({
 
 function AppointmentDetailModal({
   appt,
+  timezone,
   onClose,
   onUpdateStatus,
 }: {
   appt: Appointment
+  timezone: string
   onClose: () => void
   onUpdateStatus: (id: string, status: string) => void
 }) {
@@ -735,7 +740,7 @@ function AppointmentDetailModal({
           </div>
           <div className="apt-detail-row">
             <span className="sch-time-field-label">Horario</span>
-            <span>{fmtTime(appt.start_time)} – {fmtTime(appt.end_time)} · {new Date(appt.start_time).toLocaleDateString('es-CR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+            <span>{fmtTime(appt.start_time, timezone)} – {fmtTime(appt.end_time, timezone)} · {new Date(appt.start_time).toLocaleDateString('es-CR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: timezone })}</span>
           </div>
           {appt.staff && (
             <div className="apt-detail-row">

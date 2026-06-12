@@ -19,7 +19,7 @@ export default async function AppointmentsPage() {
 
   const { data: userData } = await supabase
     .from('users')
-    .select('full_name, role, organization_id, organizations(name, requires_staff_selection)')
+    .select('full_name, role, organization_id, organizations(name, requires_staff_selection, timezone)')
     .eq('id', user.id)
     .single()
 
@@ -64,6 +64,7 @@ export default async function AppointmentsPage() {
     <AppointmentsClient
       userData={userData as any}
       organizationId={organizationId}
+      timezone={(userData.organizations as any)?.timezone || 'America/Costa_Rica'}
       requiresStaffSelection={requiresStaffSelection}
       initialAppointments={(appointments ?? []) as any}
       initialWeekStart={monday.toISOString()}
