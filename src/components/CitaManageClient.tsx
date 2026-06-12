@@ -67,6 +67,7 @@ export default function CitaManageClient({ appointment, organization, existingRe
   const [commentInput, setCommentInput] = useState('')
   const [submittingReview, setSubmittingReview] = useState(false)
   const [reviewError, setReviewError] = useState('')
+  const [showThanks, setShowThanks] = useState(false)
 
   const accent = organization.primary_color && /^#[0-9a-fA-F]{6}$/.test(organization.primary_color) ? organization.primary_color : '#f5a623'
   const timezone = organization.timezone || 'America/Costa_Rica'
@@ -129,6 +130,7 @@ export default function CitaManageClient({ appointment, organization, existingRe
         return
       }
       setReview(data.review)
+      setShowThanks(true)
     } catch {
       setReviewError('No se pudo enviar la reseña. Intentá de nuevo.')
     }
@@ -276,6 +278,20 @@ export default function CitaManageClient({ appointment, organization, existingRe
           {error && <p className="cm-error">{error}</p>}
         </div>
       </div>
+
+      {showThanks && (
+        <div className="cm-popup-overlay" onClick={() => setShowThanks(false)}>
+          <div className="cm-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="cm-popup-icon">★</div>
+            <h3 className="cm-popup-title">¡Gracias por tu reseña!</h3>
+            <p className="cm-popup-text">Tu opinión ayuda a {organization.name} a mejorar.</p>
+            <div className="cm-popup-actions">
+              <button className="cm-secondary-btn" onClick={() => setShowThanks(false)}>Cerrar</button>
+              <a className="cm-review-submit cm-popup-exit" style={{ background: accent }} href={`/p/${organization.slug}`}>Salir</a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
