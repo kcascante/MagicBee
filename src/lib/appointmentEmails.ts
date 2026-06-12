@@ -64,7 +64,7 @@ export async function sendAppointmentNotification(appointmentId: string, event: 
 
   const { data: org } = await supabase
     .from('organizations')
-    .select('name, email, slug, primary_color, logo_url, timezone, phone, address')
+    .select('name, email, slug, primary_color, logo_url, timezone, phone, address, whatsapp_phone_number_id, whatsapp_access_token')
     .eq('id', appt.organization_id)
     .single()
 
@@ -138,21 +138,38 @@ export async function sendAppointmentNotification(appointmentId: string, event: 
         html,
       })
     } else if (appt.status === 'completed') {
-      const html = wrapper(
-        accent,
-        logoHeader,
-        `<h2 style="margin-top: 0;">¡Gracias por tu visita, ${client.full_name}!</h2>
-         <p>Esperamos que hayas disfrutado tu cita en <strong>${org.name}</strong>. Nos encantaría conocer tu opinión.</p>
-         ${detailsTable(baseRows)}
-         ${manageButton(accent, manageUrl, 'Calificar mi experiencia')}
-         <p style="color: #aaa; font-size: 12px; margin-top: 24px;">Enviado por MagicBee en nombre de ${org.name}.</p>`
-      )
-      results.client = await resend.emails.send({
-        from: FROM,
-        to: client.email,
-        subject: `¿Cómo fue tu experiencia en ${org.name}?`,
-        html,
-      })
+      if (client?.email) {
+        const html = wrapper(
+          accent,
+          logoHeader,
+          `<h2 style="margin-top: 0;">¡Gracias por tu visita, ${client.full_name}!</h2>
+           <p>Esperamos que hayas disfrutado tu cita en <strong>${org.name}</strong>. Nos encantaría conocer tu opinión.</p>
+           ${detailsTable(baseRows)}
+           ${manageButton(accent, manageUrl, 'Calificar mi experiencia')}
+           <p style="color: #aaa; font-size: 12px; margin-top: 24px;">Enviado por MagicBee en nombre de ${org.name}.</p>`
+        )
+        results.client = await resend.emails.send({
+          from: FROM,
+          to: client.email,
+          subject: `¿Cómo fue tu experiencia en ${org.name}?`,
+          html,
+        })
+      }
+
+      // Si la cita se agendo por WhatsApp, tambien pedir la resena por ese canal.
+      if (appt.booked_via === 'whatsapp' && client?.phone && org.whatsapp_phone_number_id && org.whatsapp_access_token) {
+        try {
+          const { sendWhatsAppMessage } = await import('@/lib/whatsapp')
+          await sendWhatsAppMessage(
+            org.whatsapp_phone_number_id,
+            org.whatsapp_access_token,
+            client.phone,
+            `¡Gracias por tu visita a ${org.name}! Nos encantaría conocer tu opinión, podés dejarnos tu reseña aquí: ${manageUrl}`
+          )
+        } catch (err) {
+          console.error('whatsapp review request failed', err)
+        }
+      }
     } else if (appt.status === 'cancelled') {
       const html = wrapper(
         accent,

@@ -54,7 +54,7 @@ export async function POST(req: Request) {
 
     const { data: org } = await supabase
       .from('organizations')
-      .select('id, name, timezone, cancellation_window_hours, whatsapp_access_token')
+      .select('id, name, timezone, cancellation_window_hours, whatsapp_phone_number_id, whatsapp_access_token')
       .eq('whatsapp_phone_number_id', phoneNumberId)
       .maybeSingle()
 
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
     const { data: services } = await supabase
       .from('services')
-      .select('id, name, description, duration_minutes, price')
+      .select('id, name, description, duration_minutes, price, image_url')
       .eq('organization_id', org.id)
       .eq('is_active', true)
 
@@ -90,6 +90,8 @@ export async function POST(req: Request) {
         fromPhone: from,
         history,
         userMessage: text,
+        whatsappPhoneNumberId: phoneNumberId,
+        whatsappAccessToken: org.whatsapp_access_token,
       })
     } catch (err) {
       console.error('whatsapp bot error', err)
