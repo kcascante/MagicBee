@@ -113,6 +113,11 @@ const TOOLS = [
       required: ['appointment_id'],
     },
   },
+  {
+    name: 'no_action_needed',
+    description: 'El mensaje del cliente NO requiere consultar disponibilidad, agendar, listar ni cancelar nada ahora mismo (ej. saludos, preguntas generales, o necesitas pedirle al cliente mas informacion antes de poder actuar). NUNCA uses esta herramienta si el cliente esta pidiendo agendar, confirmando un agendamiento, preguntando por sus citas o pidiendo cancelar: en esos casos usa la herramienta correspondiente.',
+    input_schema: { type: 'object', properties: {} },
+  },
 ]
 
 type ToolContext = {
@@ -296,6 +301,9 @@ async function executeTool(name: string, input: any, ctx: ToolContext) {
     case 'cancel_appointment':
       result = await toolCancelAppointment(ctx, input)
       break
+    case 'no_action_needed':
+      result = { ok: true }
+      break
     default:
       result = { error: 'unknown_tool' }
   }
@@ -303,7 +311,16 @@ async function executeTool(name: string, input: any, ctx: ToolContext) {
   return result
 }
 
-async function callClaude(system: string, messages: any[]) {
+async function callClaude(system: string, messages: any[], toolChoice?: any) {
+  const body: any = {
+    model: MODEL,
+    max_tokens: 1024,
+    system,
+    messages,
+    tools: TOOLS,
+  }
+  if (toolChoice) body.tool_choice = toolChoice
+
   const res = await fetch(ANTHROPIC_API_URL, {
     method: 'POST',
     headers: {
@@ -311,13 +328,7 @@ async function callClaude(system: string, messages: any[]) {
       'x-api-key': process.env.ANTHROPIC_API_KEY!,
       'anthropic-version': '2023-06-01',
     },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 1024,
-      system,
-      messages,
-      tools: TOOLS,
-    }),
+    body: JSON.stringify(body),
   })
 
   if (!res.ok) {
@@ -354,7 +365,8 @@ export async function runWhatsAppBot(opts: {
   ]
 
   for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
-    const response = await callClaude(system, messages)
+    const toolChoice = i === 0 ? { type: 'any' } : undefined
+    const response = await callClaude(system, messages, toolChoice)
     const content: any[] = response.content ?? []
     const toolUses = content.filter((b) => b.type === 'tool_use')
     const textBlocks = content.filter((b) => b.type === 'text')
