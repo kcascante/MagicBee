@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { sendAppointmentNotification } from '@/lib/appointmentEmails'
-import { sendWhatsAppImage } from '@/lib/whatsapp'
+import { sendWhatsAppImage, sendWhatsAppMessage } from '@/lib/whatsapp'
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = 'claude-haiku-4-5-20251001'
@@ -302,8 +302,11 @@ async function toolShowServices(ctx: ToolContext) {
   const withImages = ctx.services.filter((s) => !!s.image_url)
   const withoutImages = ctx.services.filter((s) => !s.image_url)
 
+  console.log(`[whatsapp-bot] show_services: ${ctx.services.length} servicios totales, ${withImages.length} con foto`)
+
   let sent = 0
-  for (const s of withImages) {
+  for (let idx = 0; idx < withImages.length; idx++) {
+    const s = withImages[idx]
     try {
       await sendWhatsAppImage(
         ctx.whatsappPhoneNumberId,
@@ -313,8 +316,26 @@ async function toolShowServices(ctx: ToolContext) {
         `${s.name} — ${s.duration_minutes} min — ${formatPrice(s.price)}`
       )
       sent++
+    } catch (err: any) {
+      console.error(`[whatsapp-bot] show_services image send failed for "${s.name}" (${s.id}):`, err?.message ?? err)
+    }
+    // Pequena pausa entre envios para evitar el rate limit de WhatsApp Cloud API
+    if (idx < withImages.length - 1) {
+      await new Promise((r) => setTimeout(r, 400))
+    }
+  }
+
+  if (withoutImages.length > 0) {
+    const lines = withoutImages.map((s) => `• ${s.name} — ${s.duration_minutes} min — ${formatPrice(s.price)}`).join('\n')
+    try {
+      await sendWhatsAppMessage(
+        ctx.whatsappPhoneNumberId,
+        ctx.whatsappAccessToken,
+        ctx.fromPhone,
+        `También ofrecemos:\n${lines}`
+      )
     } catch (err) {
-      console.error('[whatsapp-bot] show_services image send failed', s.id, err)
+      console.error('[whatsapp-bot] show_services text send failed', err)
     }
   }
 
@@ -322,11 +343,7 @@ async function toolShowServices(ctx: ToolContext) {
     ok: true,
     sent,
     total_with_photo: withImages.length,
-    services_without_photo: withoutImages.map((s) => ({
-      name: s.name,
-      duration_minutes: s.duration_minutes,
-      price: formatPrice(s.price),
-    })),
+    sent_text_list_for_services_without_photo: withoutImages.length,
   }
 }
 
