@@ -520,9 +520,9 @@
 }
 [data-theme="dark"] .portal-header {
   background:
-    radial-gradient(240px circle at var(--spot-x, -9999px) var(--spot-y, -9999px), rgba(255,255,255,0.30), transparent 70%),
-    linear-gradient(135deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.06) 100%),
-    rgba(255,255,255,0.04);
+    radial-gradient(240px circle at var(--spot-x, -9999px) var(--spot-y, -9999px), rgba(255,255,255,0.14), transparent 70%),
+    linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.06) 50%, rgba(0,0,0,0.14) 100%),
+    rgba(8,10,16,0.4);
   -webkit-backdrop-filter:blur(40px) saturate(220%);
   backdrop-filter:blur(40px) saturate(220%);
   border-bottom:1px solid rgba(255,255,255,0.18);
@@ -533,9 +533,9 @@
 [data-theme="dark"] .portal-empty { color:rgba(255,255,255,0.6); }
 [data-theme="dark"] .portal-service-card {
   background:
-    radial-gradient(240px circle at var(--spot-x, -9999px) var(--spot-y, -9999px), rgba(255,255,255,0.30), transparent 70%),
-    linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.015) 50%, rgba(255,255,255,0.04) 100%),
-    rgba(255,255,255,0.015);
+    radial-gradient(240px circle at var(--spot-x, -9999px) var(--spot-y, -9999px), rgba(255,255,255,0.14), transparent 70%),
+    linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.18) 100%),
+    rgba(8,10,16,0.45);
   -webkit-backdrop-filter:blur(18px) saturate(200%);
   backdrop-filter:blur(18px) saturate(200%);
   border:1px solid rgba(255,255,255,0.16);
@@ -555,9 +555,9 @@
 }
 [data-theme="dark"] .portal-modal {
   background:
-    radial-gradient(240px circle at var(--spot-x, -9999px) var(--spot-y, -9999px), rgba(255,255,255,0.35), transparent 70%),
-    linear-gradient(135deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.08) 100%),
-    rgba(255,255,255,0.06);
+    radial-gradient(240px circle at var(--spot-x, -9999px) var(--spot-y, -9999px), rgba(255,255,255,0.16), transparent 70%),
+    linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.2) 100%),
+    rgba(8,10,16,0.55);
   -webkit-backdrop-filter:blur(40px) saturate(220%);
   backdrop-filter:blur(40px) saturate(220%);
   border:1px solid rgba(255,255,255,0.18);
@@ -713,14 +713,32 @@
 
 .portal-reviews-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 24px;
 }
 
 .portal-review-card {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
+  padding: 26px;
+  min-height: 160px;
+}
+
+.portal-review-card .portal-stars {
+  gap: 3px;
+}
+
+.portal-review-card .portal-star {
+  font-size: 18px;
+}
+
+.portal-review-card .portal-review-author {
+  font-size: 14px;
+}
+
+.portal-review-card .portal-review-comment {
+  font-size: 15px;
 }
 
 .portal-review-top {
@@ -777,3 +795,5 @@
 [data-theme="dark"] .portal-reviews-empty {
   color: rgba(255,255,255,0.45);
 }
+
+/* MB-REVIEW-CARD-SIZE-AND-DARK-GLASS-V1 */

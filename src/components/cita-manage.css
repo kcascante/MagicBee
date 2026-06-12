@@ -189,7 +189,7 @@ button.cm-star:disabled {
   cursor: default;
 }
 
-.cm-star.filled {
+.cm-stars .cm-star.filled {
   color: #f5a623;
 }
 
