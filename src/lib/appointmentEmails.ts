@@ -127,9 +127,8 @@ export async function sendAppointmentNotification(appointmentId: string, event: 
   }
 
   if (event === 'status_update') {
-    if (!client?.email) return { skipped: true, reason: 'no client email' }
-
     if (appt.status === 'confirmed') {
+      if (client?.email) {
       const html = wrapper(
         accent,
         logoHeader,
@@ -146,6 +145,7 @@ export async function sendAppointmentNotification(appointmentId: string, event: 
         subject: `Tu cita en ${org.name} fue confirmada`,
         html,
       })
+      }
     } else if (appt.status === 'completed') {
       if (client?.email) {
         const html = wrapper(
@@ -187,6 +187,7 @@ export async function sendAppointmentNotification(appointmentId: string, event: 
         })
       }
     } else if (appt.status === 'cancelled') {
+      if (client?.email) {
       const html = wrapper(
         accent,
         logoHeader,
@@ -202,6 +203,7 @@ export async function sendAppointmentNotification(appointmentId: string, event: 
         subject: `Tu cita en ${org.name} fue cancelada`,
         html,
       })
+      }
     } else {
       return { skipped: true, reason: 'status not notifiable' }
     }
