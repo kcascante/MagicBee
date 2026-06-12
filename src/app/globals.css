@@ -1,4 +1,3 @@
-@import "./tema-oscuro-glass.css";
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -173,4 +172,23 @@
     radial-gradient(240px circle at var(--spot-x, -9999px) var(--spot-y, -9999px), rgba(255,255,255,0.4), transparent 70%),
     linear-gradient(135deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.10) 100%),
     rgba(255,255,255,0.06) !important;
+}
+
+/* MB-SVC-MODAL-OPACITY-FIX-V1
+   .svc-modal se usa para "Editar servicio" Y para el detalle de citas.
+   El bloque MB-FROSTED-GLASS-V2 lo dejo demasiado transparente; aqui se
+   sube la opacidad de base para que no se mezcle con el contenido de atras,
+   conservando el brillo sutil que sigue al mouse. */
+[data-theme="dark"] .svc-modal {
+  background:
+    radial-gradient(240px circle at var(--spot-x, -9999px) var(--spot-y, -9999px), rgba(255,255,255,0.16), transparent 70%),
+    linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.10) 50%, rgba(0,0,0,0.20) 100%),
+    rgba(15,12,28,0.92) !important;
+}
+
+[data-theme="dark"] .svc-modal:hover {
+  background:
+    radial-gradient(240px circle at var(--spot-x, -9999px) var(--spot-y, -9999px), rgba(255,255,255,0.2), transparent 70%),
+    linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.10) 50%, rgba(0,0,0,0.20) 100%),
+    rgba(15,12,28,0.94) !important;
 }
