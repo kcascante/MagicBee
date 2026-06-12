@@ -137,6 +137,22 @@ export async function sendAppointmentNotification(appointmentId: string, event: 
         subject: `Tu cita en ${org.name} fue confirmada`,
         html,
       })
+    } else if (appt.status === 'completed') {
+      const html = wrapper(
+        accent,
+        logoHeader,
+        `<h2 style="margin-top: 0;">¡Gracias por tu visita, ${client.full_name}!</h2>
+         <p>Esperamos que hayas disfrutado tu cita en <strong>${org.name}</strong>. Nos encantaría conocer tu opinión.</p>
+         ${detailsTable(baseRows)}
+         ${manageButton(accent, manageUrl, 'Calificar mi experiencia')}
+         <p style="color: #aaa; font-size: 12px; margin-top: 24px;">Enviado por MagicBee en nombre de ${org.name}.</p>`
+      )
+      results.client = await resend.emails.send({
+        from: FROM,
+        to: client.email,
+        subject: `¿Cómo fue tu experiencia en ${org.name}?`,
+        html,
+      })
     } else if (appt.status === 'cancelled') {
       const html = wrapper(
         accent,

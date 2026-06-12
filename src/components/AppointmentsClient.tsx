@@ -380,7 +380,7 @@ export default function AppointmentsClient({
       setAppointments((prev) => prev.map((a) => (a.id === id ? (data as any) : a)))
       setSelectedAppt(data as any)
 
-      if (status === 'confirmed' || status === 'cancelled') {
+      if (status === 'confirmed' || status === 'cancelled' || status === 'completed') {
         fetch('/api/notifications/appointment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
