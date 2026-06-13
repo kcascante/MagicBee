@@ -83,6 +83,12 @@ export async function POST(req: Request) {
       .select('day_of_week, start_time, end_time, break_start, break_end, is_active')
       .eq('organization_id', org.id)
       .is('staff_id', null)
+    const { data: staff } = await supabase
+      .from('staff')
+      .select('id, full_name')
+      .eq('organization_id', org.id)
+      .eq('is_active', true)
+      .order('full_name')
 
     // Cargar/crear la sesion de conversacion (historial para darle contexto a la IA)
     const { data: session } = await supabase
@@ -103,6 +109,7 @@ export async function POST(req: Request) {
         org,
         services: services ?? [],
         schedules: (schedules ?? []) as ScheduleRow[],
+        staff: staff ?? [],
         fromPhone: from,
         history,
         userMessage: text,

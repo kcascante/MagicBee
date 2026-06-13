@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MagicBee - Knowledge Graph</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0d1117; color: #e6edf3; font-family: 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; }
+
+  #header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(13,17,23,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid #30363d; padding: 10px 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  #header h1 { font-size: 15px; font-weight: 700; color: #f0b429; white-space: nowrap; }
+  #search { background: #161b22; border: 1px solid #30363d; color: #e6edf3; padding: 5px 10px; border-radius: 6px; font-size: 13px; width: 200px; outline: none; }
+  #search:focus { border-color: #f0b429; }
+  .filter-btn { background: #161b22; border: 1px solid #30363d; color: #8b949e; padding: 4px 10px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all .15s; }
+  .filter-btn:hover, .filter-btn.active { color: #fff; border-color: currentColor; }
+  .filter-btn.f-page   { --c: #58a6ff; }
+  .filter-btn.f-api    { --c: #f85149; }
+  .filter-btn.f-comp   { --c: #3fb950; }
+  .filter-btn.f-lib    { --c: #bc8cff; }
+  .filter-btn.f-table  { --c: #ffa657; }
+  .filter-btn.f-ext    { --c: #79c0ff; }
+  .filter-btn.active   { background: color-mix(in srgb, var(--c) 15%, transparent); border-color: var(--c); color: var(--c); }
+
+  #canvas { position: fixed; top: 52px; left: 0; right: 0; bottom: 0; }
+
+  .node circle { stroke-width: 2; cursor: pointer; transition: r .1s; }
+  .node text { font-size: 10px; fill: #c9d1d9; pointer-events: none; text-shadow: 0 0 4px #0d1117, 0 0 4px #0d1117; }
+  .node:hover circle { stroke-width: 3; }
+
+  .link { stroke-opacity: 0.35; }
+
+  #tooltip { position: fixed; background: rgba(13,17,23,0.97); border: 1px solid #30363d; border-radius: 8px; padding: 10px 14px; font-size: 12px; pointer-events: none; max-width: 280px; z-index: 200; display: none; }
+  #tooltip .tt-title { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+  #tooltip .tt-cat { font-size: 11px; margin-bottom: 8px; opacity: .7; }
+  #tooltip .tt-row { margin: 3px 0; line-height: 1.4; }
+  #tooltip .tt-label { color: #8b949e; }
+
+  #legend { position: fixed; bottom: 14px; left: 14px; background: rgba(13,17,23,0.9); border: 1px solid #30363d; border-radius: 8px; padding: 10px 14px; font-size: 12px; z-index: 100; }
+  #legend h3 { font-size: 11px; color: #8b949e; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .05em; }
+  .legend-item { display: flex; align-items: center; gap: 7px; margin: 5px 0; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  #info { position: fixed; bottom: 14px; right: 14px; background: rgba(13,17,23,0.9); border: 1px solid #30363d; border-radius: 8px; padding: 10px 14px; font-size: 11px; color: #8b949e; z-index: 100; line-height: 1.8; }
+
+  #stats { position: fixed; top: 62px; right: 14px; background: rgba(13,17,23,0.9); border: 1px solid #30363d; border-radius: 8px; padding: 10px 14px; font-size: 11px; z-index: 100; }
+  #stats div { color: #8b949e; margin: 2px 0; }
+  #stats span { color: #e6edf3; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <h1>🐝 MagicBee — Knowledge Graph</h1>
+  <input id="search" type="text" placeholder="Buscar nodo..." />
+  <button class="filter-btn f-page  active" data-cat="page">Pages</button>
+  <button class="filter-btn f-api   active" data-cat="api">API Routes</button>
+  <button class="filter-btn f-comp  active" data-cat="component">Componentes</button>
+  <button class="filter-btn f-lib   active" data-cat="lib">Librerías</button>
+  <button class="filter-btn f-table active" data-cat="table">BD Tables</button>
+  <button class="filter-btn f-ext   active" data-cat="external">Externos</button>
+</div>
+
+<div id="canvas"></div>
+<div id="tooltip"></div>
+
+<div id="legend">
+  <h3>Categorías</h3>
+  <div class="legend-item"><div class="legend-dot" style="background:#58a6ff"></div> Pages / Rutas</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f85149"></div> API Routes</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#3fb950"></div> Componentes</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#bc8cff"></div> Librerías / Utils</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ffa657"></div> Tablas Supabase</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#79c0ff"></div> Servicios Externos</div>
+</div>
+
+<div id="stats">
+  <div>Nodos: <span id="s-nodes">0</span></div>
+  <div>Conexiones: <span id="s-links">0</span></div>
+</div>
+
+<div id="info">
+  Scroll → zoom &nbsp;|&nbsp; Drag → mover &nbsp;|&nbsp; Hover → info &nbsp;|&nbsp; Click → fijar
+</div>
+
+<script>
+const COLORS = {
+  page:      '#58a6ff',
+  api:       '#f85149',
+  component: '#3fb950',
+  lib:       '#bc8cff',
+  table:     '#ffa657',
+  external:  '#79c0ff'
+};
+
+const SIZES = {
+  page: 9, api: 10, component: 9, lib: 8, table: 11, external: 10
+};
+
+// ── NODES ──────────────────────────────────────────────────────────────────
+const nodes = [
+  // Pages
+  { id:'middleware',            cat:'page',      label:'middleware',            desc:'Session refresh y redirects de rol (superadmin vs user)' },
+  { id:'layout',                cat:'page',      label:'layout.tsx',            desc:'Root layout: ThemeProvider + ThemeSwitch + GlassSpotlight' },
+  { id:'page-root',             cat:'page',      label:'/ (root)',              desc:'Redirección: auth → /dashboard, no-auth → /login' },
+  { id:'page-login',            cat:'page',      label:'/login',                desc:'Login con email/password via Supabase Auth' },
+  { id:'page-register',         cat:'page',      label:'/register',             desc:'Registro: llama a /api/register' },
+  { id:'page-forgot',           cat:'page',      label:'/forgot-password',      desc:'Reset password (email → OTP → nueva contraseña)' },
+  { id:'page-dashboard',        cat:'page',      label:'/dashboard',            desc:'Métricas del día/semana: citas, clientes, ingresos' },
+  { id:'page-appointments',     cat:'page',      label:'/dashboard/appointments',desc:'Vista semanal de citas con clientes/servicio/staff' },
+  { id:'page-clients',          cat:'page',      label:'/dashboard/clients',    desc:'Lista de clientes con segmentos VIP/Regular/At-risk/New/No-shows' },
+  { id:'page-promotions',       cat:'page',      label:'/dashboard/promotions', desc:'Campañas promocionales por segmento' },
+  { id:'page-reviews',          cat:'page',      label:'/dashboard/reviews',    desc:'Gestión de reseñas con respuestas admin' },
+  { id:'page-schedules',        cat:'page',      label:'/dashboard/schedules',  desc:'Horarios operativos por día con breaks' },
+  { id:'page-services',         cat:'page',      label:'/dashboard/services',   desc:'Catálogo de servicios (nombre, precio, duración, imagen)' },
+  { id:'page-settings',         cat:'page',      label:'/dashboard/settings',   desc:'Config del negocio: logo, colores, WhatsApp, plan' },
+  { id:'page-staff',            cat:'page',      label:'/dashboard/staff',      desc:'Gestión de equipo con avatars' },
+  { id:'page-stats',            cat:'page',      label:'/dashboard/stats',      desc:'Analytics: heatmap, top clientes, segmentos' },
+  { id:'page-portal',           cat:'page',      label:'/p/[slug]',             desc:'Portal público de reservas del negocio' },
+  { id:'page-cita',             cat:'page',      label:'/p/[slug]/cita/[id]',   desc:'Detalle de cita del cliente con cancelación y reseña' },
+  { id:'page-superadmin',       cat:'page',      label:'/superadmin',           desc:'Vista global superadmin de todos los negocios' },
+  { id:'page-auth-callback',    cat:'page',      label:'/auth/callback',        desc:'OAuth callback: intercambia código por sesión' },
+
+  // API Routes
+  { id:'api-whatsapp',          cat:'api',       label:'api/whatsapp/webhook',  desc:'Webhook WhatsApp Cloud API: verifica y procesa mensajes con bot IA' },
+  { id:'api-cancel',            cat:'api',       label:'api/appointments/cancel',desc:'Cancela citas validando ventana de cancelación' },
+  { id:'api-notif',             cat:'api',       label:'api/notifications/appointment',desc:'Envía emails de notificación por evento (confirm/cancel/update)' },
+  { id:'api-promo',             cat:'api',       label:'api/promotions/send',   desc:'Envía campañas por WhatsApp o email a segmentos' },
+  { id:'api-register',          cat:'api',       label:'api/register',          desc:'Registro de usuario + creación de organización' },
+  { id:'api-reviews',           cat:'api',       label:'api/reviews',           desc:'Crea reseñas para citas completadas' },
+
+  // Components
+  { id:'comp-appointments',     cat:'component', label:'AppointmentsClient',    desc:'Calendario interactivo de citas con CRUD y estados' },
+  { id:'comp-cita',             cat:'component', label:'CitaManageClient',      desc:'Tarjeta de cita del cliente con cancelación y formulario de reseña' },
+  { id:'comp-clients',          cat:'component', label:'ClientsClient',         desc:'Lista de clientes con búsqueda, filtros, historial e inline edit' },
+  { id:'comp-dashboard',        cat:'component', label:'DashboardClient',       desc:'Cards de métricas y citas de hoy' },
+  { id:'comp-portal',           cat:'component', label:'PortalClient',          desc:'UI del portal: servicios, staff, reseñas y modal de reserva' },
+  { id:'comp-promotions',       cat:'component', label:'PromotionsClient',      desc:'Builder de campañas con segmentos, canales y templates' },
+  { id:'comp-reviews',          cat:'component', label:'ReviewsClient',         desc:'Gestión de reseñas: filtros, respuestas admin, toggle público' },
+  { id:'comp-schedules',        cat:'component', label:'SchedulesClient',       desc:'Editor de horarios semanales con breaks' },
+  { id:'comp-services',         cat:'component', label:'ServicesClient',        desc:'Catálogo CRUD con upload de imágenes a Supabase Storage' },
+  { id:'comp-settings',         cat:'component', label:'SettingsClient',        desc:'Formulario de settings con upload de logo' },
+  { id:'comp-staff',            cat:'component', label:'StaffClient',           desc:'CRUD de staff con avatar upload' },
+  { id:'comp-stats',            cat:'component', label:'StatsClient',           desc:'Dashboard analytics con Chart.js: heatmap, gauge, rankings' },
+  { id:'comp-superlogout',      cat:'component', label:'SuperadminLogout',      desc:'Botón logout para superadmin' },
+  { id:'comp-logout',           cat:'component', label:'LogoutButton',          desc:'Botón logout para usuarios normales' },
+  { id:'comp-theme',            cat:'component', label:'ThemeSwitch',           desc:'Toggle dark/light + logo animado MagicBee' },
+  { id:'comp-spotlight',        cat:'component', label:'GlassSpotlight',        desc:'Efecto spotlight siguiendo el mouse (glass-morphism)' },
+  { id:'comp-button',           cat:'component', label:'ui/button',             desc:'Botón reutilizable con variantes CVA + Radix Slot' },
+
+  // Libraries
+  { id:'lib-supa-client',       cat:'lib',       label:'supabase/client',       desc:'Browser client Supabase (SSR)' },
+  { id:'lib-supa-server',       cat:'lib',       label:'supabase/server',       desc:'Server client Supabase con manejo de cookies' },
+  { id:'lib-supa-admin',        cat:'lib',       label:'supabase/admin',        desc:'Admin client con service_role key' },
+  { id:'lib-supa-middleware',   cat:'lib',       label:'supabase/middleware',   desc:'updateSession + redirects basados en rol' },
+  { id:'lib-whatsapp',          cat:'lib',       label:'lib/whatsapp',          desc:'Wrapper Meta Graph API v21 con retry en errores transitorios' },
+  { id:'lib-bot',               cat:'lib',       label:'lib/whatsappBot',       desc:'Bot IA de reservas via Anthropic Claude con tools' },
+  { id:'lib-promotions',        cat:'lib',       label:'lib/promotions',        desc:'Segmentación de clientes y templates de campañas' },
+  { id:'lib-emails',            cat:'lib',       label:'lib/appointmentEmails', desc:'Emails transaccionales de citas via Resend' },
+  { id:'lib-utils',             cat:'lib',       label:'lib/utils',             desc:'cn() helper para merge de clases Tailwind' },
+  { id:'lib-theme',             cat:'lib',       label:'lib/theme',             desc:'Context de tema dark/light con localStorage' },
+
+  // Supabase Tables
+  { id:'t-organizations',       cat:'table',     label:'organizations',         desc:'Datos del negocio: nombre, logo, slug, colores, plan, WhatsApp config' },
+  { id:'t-users',               cat:'table',     label:'users',                 desc:'Usuarios autenticados con referencia a organización y rol' },
+  { id:'t-appointments',        cat:'table',     label:'appointments',          desc:'Citas: cliente, servicio, staff, fecha, estado, notas, client_name' },
+  { id:'t-clients',             cat:'table',     label:'clients',               desc:'Clientes del negocio con teléfono, email, notas' },
+  { id:'t-services',            cat:'table',     label:'services',              desc:'Servicios: nombre, duración, precio, imagen, activo' },
+  { id:'t-staff',               cat:'table',     label:'staff',                 desc:'Miembros del equipo con avatar' },
+  { id:'t-schedules',           cat:'table',     label:'schedules',             desc:'Horarios semanales con breaks por día' },
+  { id:'t-campaigns',           cat:'table',     label:'campaigns',             desc:'Campañas promocionales: canal, segmento, template, estado' },
+  { id:'t-campaign-recipients', cat:'table',     label:'campaign_recipients',   desc:'Destinatarios de campañas con estado de entrega' },
+  { id:'t-reviews',             cat:'table',     label:'reviews',               desc:'Reseñas de clientes con rating, texto, respuesta admin' },
+  { id:'t-sessions',            cat:'table',     label:'whatsapp_sessions',     desc:'Historial de conversaciones del bot WhatsApp por número' },
+
+  // External Services
+  { id:'ext-supabase',          cat:'external',  label:'Supabase Auth/DB',      desc:'Backend-as-a-Service: autenticación, PostgreSQL, Storage' },
+  { id:'ext-meta',              cat:'external',  label:'Meta WhatsApp API',     desc:'Cloud API v21: envío/recepción de mensajes, plantillas' },
+  { id:'ext-anthropic',         cat:'external',  label:'Anthropic Claude API',  desc:'Claude Haiku para el bot de reservas por WhatsApp' },
+  { id:'ext-resend',            cat:'external',  label:'Resend Email API',      desc:'Envío de emails transaccionales y campañas' },
+];
+
+// ── LINKS ──────────────────────────────────────────────────────────────────
+const links = [
+  // middleware
+  { s:'middleware',          t:'lib-supa-middleware', type:'uses' },
+  { s:'lib-supa-middleware', t:'ext-supabase',        type:'calls' },
+  { s:'lib-supa-middleware', t:'t-users',             type:'reads' },
+
+  // layout
+  { s:'layout',    t:'lib-theme',      type:'uses' },
+  { s:'layout',    t:'comp-theme',     type:'renders' },
+  { s:'layout',    t:'comp-spotlight', type:'renders' },
+
+  // root page
+  { s:'page-root', t:'lib-supa-server', type:'uses' },
+  { s:'page-root', t:'ext-supabase',    type:'calls' },
+
+  // auth pages
+  { s:'page-login',    t:'lib-supa-client', type:'uses' },
+  { s:'page-register', t:'lib-supa-client', type:'uses' },
+  { s:'page-register', t:'api-register',    type:'calls' },
+  { s:'page-forgot',   t:'lib-supa-client', type:'uses' },
+  { s:'page-auth-callback', t:'lib-supa-server', type:'uses' },
+
+  // api/register
+  { s:'api-register', t:'lib-supa-admin',    type:'uses' },
+  { s:'api-register', t:'t-organizations',   type:'writes' },
+  { s:'api-register', t:'t-users',           type:'writes' },
+  { s:'lib-supa-admin', t:'ext-supabase',    type:'calls' },
+
+  // dashboard pages → server + component
+  { s:'page-dashboard',    t:'lib-supa-server',     type:'uses' },
+  { s:'page-dashboard',    t:'comp-dashboard',      type:'renders' },
+  { s:'page-dashboard',    t:'t-users',             type:'reads' },
+  { s:'page-dashboard',    t:'t-organizations',     type:'reads' },
+  { s:'page-dashboard',    t:'t-appointments',      type:'reads' },
+  { s:'page-dashboard',    t:'t-clients',           type:'reads' },
+  { s:'page-dashboard',    t:'t-services',          type:'reads' },
+
+  { s:'page-appointments', t:'lib-supa-server',     type:'uses' },
+  { s:'page-appointments', t:'comp-appointments',   type:'renders' },
+  { s:'page-appointments', t:'t-appointments',      type:'reads' },
+  { s:'page-appointments', t:'t-clients',           type:'reads' },
+  { s:'page-appointments', t:'t-services',          type:'reads' },
+  { s:'page-appointments', t:'t-staff',             type:'reads' },
+
+  { s:'page-clients',      t:'lib-supa-server',     type:'uses' },
+  { s:'page-clients',      t:'comp-clients',        type:'renders' },
+  { s:'page-clients',      t:'t-clients',           type:'reads' },
+  { s:'page-clients',      t:'t-appointments',      type:'reads' },
+
+  { s:'page-promotions',   t:'lib-supa-server',     type:'uses' },
+  { s:'page-promotions',   t:'comp-promotions',     type:'renders' },
+  { s:'page-promotions',   t:'lib-promotions',      type:'uses' },
+  { s:'page-promotions',   t:'t-campaigns',         type:'reads' },
+  { s:'page-promotions',   t:'t-clients',           type:'reads' },
+
+  { s:'page-reviews',      t:'lib-supa-server',     type:'uses' },
+  { s:'page-reviews',      t:'comp-reviews',        type:'renders' },
+  { s:'page-reviews',      t:'t-reviews',           type:'reads' },
+  { s:'page-reviews',      t:'t-clients',           type:'reads' },
+
+  { s:'page-schedules',    t:'lib-supa-server',     type:'uses' },
+  { s:'page-schedules',    t:'comp-schedules',      type:'renders' },
+  { s:'page-schedules',    t:'t-schedules',         type:'reads' },
+
+  { s:'page-services',     t:'lib-supa-server',     type:'uses' },
+  { s:'page-services',     t:'comp-services',       type:'renders' },
+  { s:'page-services',     t:'t-services',          type:'reads' },
+
+  { s:'page-settings',     t:'lib-supa-server',     type:'uses' },
+  { s:'page-settings',     t:'comp-settings',       type:'renders' },
+  { s:'page-settings',     t:'t-organizations',     type:'reads' },
+
+  { s:'page-staff',        t:'lib-supa-server',     type:'uses' },
+  { s:'page-staff',        t:'comp-staff',          type:'renders' },
+  { s:'page-staff',        t:'t-staff',             type:'reads' },
+
+  { s:'page-stats',        t:'lib-supa-server',     type:'uses' },
+  { s:'page-stats',        t:'comp-stats',          type:'renders' },
+  { s:'page-stats',        t:'t-appointments',      type:'reads' },
+  { s:'page-stats',        t:'t-clients',           type:'reads' },
+
+  { s:'page-portal',       t:'lib-supa-server',     type:'uses' },
+  { s:'page-portal',       t:'comp-portal',         type:'renders' },
+  { s:'page-portal',       t:'t-organizations',     type:'reads' },
+  { s:'page-portal',       t:'t-reviews',           type:'reads' },
+
+  { s:'page-cita',         t:'comp-cita',           type:'renders' },
+  { s:'page-cita',         t:'t-appointments',      type:'reads' },
+  { s:'page-cita',         t:'t-organizations',     type:'reads' },
+
+  { s:'page-superadmin',   t:'lib-supa-server',     type:'uses' },
+  { s:'page-superadmin',   t:'comp-superlogout',    type:'renders' },
+  { s:'page-superadmin',   t:'t-organizations',     type:'reads' },
+  { s:'page-superadmin',   t:'t-users',             type:'reads' },
+
+  // components → supabase client
+  { s:'comp-appointments', t:'lib-supa-client', type:'uses' },
+  { s:'comp-appointments', t:'t-appointments',  type:'writes' },
+  { s:'comp-appointments', t:'t-clients',       type:'reads' },
+  { s:'comp-appointments', t:'t-services',      type:'reads' },
+  { s:'comp-appointments', t:'t-staff',         type:'reads' },
+
+  { s:'comp-cita',         t:'api-cancel',      type:'calls' },
+  { s:'comp-cita',         t:'api-reviews',     type:'calls' },
+
+  { s:'comp-clients',      t:'lib-supa-client', type:'uses' },
+  { s:'comp-clients',      t:'t-clients',       type:'writes' },
+
+  { s:'comp-promotions',   t:'lib-supa-client', type:'uses' },
+  { s:'comp-promotions',   t:'api-promo',       type:'calls' },
+  { s:'comp-promotions',   t:'lib-promotions',  type:'uses' },
+  { s:'comp-promotions',   t:'t-campaigns',     type:'writes' },
+
+  { s:'comp-reviews',      t:'lib-supa-client', type:'uses' },
+  { s:'comp-reviews',      t:'t-reviews',       type:'writes' },
+
+  { s:'comp-schedules',    t:'lib-supa-client', type:'uses' },
+  { s:'comp-schedules',    t:'t-schedules',     type:'writes' },
+
+  { s:'comp-services',     t:'lib-supa-client', type:'uses' },
+  { s:'comp-services',     t:'t-services',      type:'writes' },
+  { s:'comp-services',     t:'ext-supabase',    type:'calls' },
+
+  { s:'comp-settings',     t:'lib-supa-client', type:'uses' },
+  { s:'comp-settings',     t:'t-organizations', type:'writes' },
+  { s:'comp-settings',     t:'ext-supabase',    type:'calls' },
+
+  { s:'comp-staff',        t:'lib-supa-client', type:'uses' },
+  { s:'comp-staff',        t:'t-staff',         type:'writes' },
+  { s:'comp-staff',        t:'ext-supabase',    type:'calls' },
+
+  { s:'comp-logout',       t:'lib-supa-client', type:'uses' },
+  { s:'comp-superlogout',  t:'lib-supa-client', type:'uses' },
+
+  { s:'comp-theme',        t:'lib-theme',       type:'uses' },
+
+  // API routes
+  { s:'api-whatsapp',      t:'lib-whatsapp',    type:'uses' },
+  { s:'api-whatsapp',      t:'lib-bot',         type:'uses' },
+  { s:'api-whatsapp',      t:'t-organizations', type:'reads' },
+  { s:'api-whatsapp',      t:'t-services',      type:'reads' },
+  { s:'api-whatsapp',      t:'t-schedules',     type:'reads' },
+  { s:'api-whatsapp',      t:'t-staff',         type:'reads' },
+  { s:'api-whatsapp',      t:'t-sessions',      type:'writes' },
+  { s:'api-whatsapp',      t:'ext-meta',        type:'calls' },
+
+  { s:'api-cancel',        t:'lib-emails',      type:'uses' },
+  { s:'api-cancel',        t:'t-appointments',  type:'writes' },
+  { s:'api-cancel',        t:'t-organizations', type:'reads' },
+
+  { s:'api-notif',         t:'lib-emails',      type:'uses' },
+
+  { s:'api-promo',         t:'lib-supa-server', type:'uses' },
+  { s:'api-promo',         t:'lib-whatsapp',    type:'uses' },
+  { s:'api-promo',         t:'lib-promotions',  type:'uses' },
+  { s:'api-promo',         t:'t-campaigns',     type:'writes' },
+  { s:'api-promo',         t:'t-campaign-recipients', type:'writes' },
+  { s:'api-promo',         t:'t-clients',       type:'reads' },
+  { s:'api-promo',         t:'ext-resend',      type:'calls' },
+  { s:'api-promo',         t:'ext-meta',        type:'calls' },
+
+  { s:'api-reviews',       t:'t-reviews',       type:'writes' },
+  { s:'api-reviews',       t:'t-appointments',  type:'reads' },
+
+  // lib dependencies
+  { s:'lib-supa-client',   t:'ext-supabase',    type:'calls' },
+  { s:'lib-supa-server',   t:'ext-supabase',    type:'calls' },
+
+  { s:'lib-whatsapp',      t:'ext-meta',        type:'calls' },
+
+  { s:'lib-bot',           t:'ext-anthropic',   type:'calls' },
+  { s:'lib-bot',           t:'lib-whatsapp',    type:'uses' },
+  { s:'lib-bot',           t:'lib-emails',      type:'uses' },
+  { s:'lib-bot',           t:'t-organizations', type:'reads' },
+  { s:'lib-bot',           t:'t-services',      type:'reads' },
+  { s:'lib-bot',           t:'t-schedules',     type:'reads' },
+  { s:'lib-bot',           t:'t-staff',         type:'reads' },
+  { s:'lib-bot',           t:'t-clients',       type:'writes' },
+  { s:'lib-bot',           t:'t-appointments',  type:'writes' },
+  { s:'lib-bot',           t:'t-sessions',      type:'writes' },
+
+  { s:'lib-promotions',    t:'t-clients',       type:'reads' },
+  { s:'lib-promotions',    t:'t-appointments',  type:'reads' },
+
+  { s:'lib-emails',        t:'ext-resend',      type:'calls' },
+  { s:'lib-emails',        t:'t-appointments',  type:'reads' },
+  { s:'lib-emails',        t:'t-organizations', type:'reads' },
+  { s:'lib-emails',        t:'t-clients',       type:'reads' },
+
+  { s:'lib-utils',         t:'lib-supa-client', type:'used-by' },
+  { s:'comp-button',       t:'lib-utils',       type:'uses' },
+];
+
+// ── GRAPH ──────────────────────────────────────────────────────────────────
+const linkColor = { uses:'#58a6ff', calls:'#f85149', reads:'#3fb950', writes:'#ffa657', renders:'#bc8cff', 'used-by':'#79c0ff' };
+const LINK_OPACITY = 0.4;
+
+let activeCategories = new Set(['page','api','component','lib','table','external']);
+let searchTerm = '';
+
+const W = window.innerWidth, H = window.innerHeight - 52;
+
+const svg = d3.select('#canvas').append('svg')
+  .attr('width', W).attr('height', H);
+
+const g = svg.append('g');
+
+svg.call(d3.zoom().scaleExtent([0.2, 4]).on('zoom', e => g.attr('transform', e.transform)));
+
+let simulation, linkSel, nodeSel;
+
+function buildGraph() {
+  const visNodes = nodes.filter(n => activeCategories.has(n.cat) &&
+    (!searchTerm || n.label.toLowerCase().includes(searchTerm) || n.desc.toLowerCase().includes(searchTerm)));
+  const visIds = new Set(visNodes.map(n => n.id));
+  const visLinks = links
+    .filter(l => visIds.has(l.s) && visIds.has(l.t))
+    .map(l => ({ ...l, source: l.s, target: l.t }));
+
+  document.getElementById('s-nodes').textContent = visNodes.length;
+  document.getElementById('s-links').textContent = visLinks.length;
+
+  g.selectAll('*').remove();
+
+  if (simulation) simulation.stop();
+
+  simulation = d3.forceSimulation(visNodes)
+    .force('link', d3.forceLink(visLinks).id(d => d.id).distance(90).strength(0.5))
+    .force('charge', d3.forceManyBody().strength(-280))
+    .force('center', d3.forceCenter(W / 2, H / 2))
+    .force('collision', d3.forceCollide(18))
+    .alphaDecay(0.015);
+
+  linkSel = g.append('g').selectAll('line').data(visLinks).join('line')
+    .attr('class', 'link')
+    .attr('stroke', d => linkColor[d.type] || '#555')
+    .attr('stroke-width', 1.4)
+    .attr('stroke-opacity', LINK_OPACITY);
+
+  nodeSel = g.append('g').selectAll('g').data(visNodes).join('g')
+    .attr('class', 'node')
+    .call(d3.drag()
+      .on('start', (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+      .on('drag',  (e, d) => { d.fx = e.x; d.fy = e.y; })
+      .on('end',   (e, d) => { if (!e.active) simulation.alphaTarget(0); })
+    )
+    .on('mouseover', showTooltip)
+    .on('mousemove', moveTooltip)
+    .on('mouseout',  hideTooltip)
+    .on('click', (e, d) => { if (d.fx) { d.fx = null; d.fy = null; } else { d.fx = d.x; d.fy = d.y; } });
+
+  nodeSel.append('circle')
+    .attr('r', d => SIZES[d.cat] || 8)
+    .attr('fill', d => COLORS[d.cat])
+    .attr('stroke', d => d3.color(COLORS[d.cat]).brighter(1).formatHex())
+    .attr('fill-opacity', 0.85);
+
+  nodeSel.append('text')
+    .attr('x', d => (SIZES[d.cat] || 8) + 3)
+    .attr('y', 4)
+    .text(d => d.label);
+
+  simulation.on('tick', () => {
+    linkSel
+      .attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+      .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+    nodeSel.attr('transform', d => `translate(${d.x},${d.y})`);
+  });
+}
+
+// ── TOOLTIP ────────────────────────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+
+function showTooltip(e, d) {
+  const connectedLinks = links.filter(l => l.s === d.id || l.t === d.id);
+  const out = connectedLinks.filter(l => l.s === d.id);
+  const ins = connectedLinks.filter(l => l.t === d.id);
+
+  let html = `<div class="tt-title" style="color:${COLORS[d.cat]}">${d.label}</div>`;
+  html += `<div class="tt-cat">${{ page:'Page / Ruta', api:'API Route', component:'Componente', lib:'Librería', table:'Tabla Supabase', external:'Servicio Externo' }[d.cat]}</div>`;
+  html += `<div class="tt-row">${d.desc}</div>`;
+  if (out.length) html += `<div class="tt-row" style="margin-top:8px"><span class="tt-label">Usa → </span>${out.map(l=>l.t).slice(0,5).join(', ')}</div>`;
+  if (ins.length) html += `<div class="tt-row"><span class="tt-label">Usado por → </span>${ins.map(l=>l.s).slice(0,5).join(', ')}</div>`;
+
+  tooltip.innerHTML = html;
+  tooltip.style.display = 'block';
+  moveTooltip(e);
+}
+function moveTooltip(e) {
+  tooltip.style.left = (e.clientX + 14) + 'px';
+  tooltip.style.top  = (e.clientY - 10) + 'px';
+}
+function hideTooltip() { tooltip.style.display = 'none'; }
+
+// ── CONTROLS ───────────────────────────────────────────────────────────────
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const cat = btn.dataset.cat;
+    if (activeCategories.has(cat)) activeCategories.delete(cat);
+    else activeCategories.add(cat);
+    btn.classList.toggle('active');
+    buildGraph();
+  });
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  searchTerm = e.target.value.toLowerCase().trim();
+  buildGraph();
+});
+
+window.addEventListener('resize', () => {
+  svg.attr('width', window.innerWidth).attr('height', window.innerHeight - 52);
+});
+
+buildGraph();
+</script>
+</body>
+</html>
