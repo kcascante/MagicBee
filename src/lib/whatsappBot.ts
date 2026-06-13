@@ -4,7 +4,7 @@ import { sendWhatsAppImage, sendWhatsAppMessage } from '@/lib/whatsapp'
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = 'claude-haiku-4-5-20251001'
-const MAX_TOOL_ITERATIONS = 4
+const MAX_TOOL_ITERATIONS = 6
 const MAX_HISTORY_MESSAGES = 16
 
 export type ChatMessage = { role: 'user' | 'assistant'; content: string }
@@ -115,7 +115,7 @@ function buildSystemPrompt(org: Org, services: Service[], schedules: ScheduleRow
   let staffSection = ''
   if (staff.length > 1) {
     const staffList = staff.map((s) => `- id: ${s.id} | ${s.full_name}`).join('\n')
-    staffSection = `\nProfesionales disponibles (usa el "id" exacto al llamar herramientas, nunca lo inventes ni lo muestres al cliente):\n${staffList}\n\nSi el cliente no menciona preferencia de profesional, puedes agendar sin especificar staff_id (el negocio asignara a alguien disponible). Si el cliente menciona el nombre de un profesional, usa su id en staff_id al llamar check_availability y book_appointment.\n`
+    staffSection = `\nProfesionales disponibles (usa el "id" exacto al llamar herramientas, nunca lo inventes ni lo muestres al cliente):\n${staffList}\n\nIMPORTANTE sobre disponibilidad: cada profesional tiene su propia agenda independiente. Si el cliente menciona el nombre de un profesional, usa su id en staff_id al llamar check_availability y book_appointment. Si el cliente NO tiene preferencia de profesional, para encontrar el horario que pidio: llama check_availability una vez por cada profesional de la lista (probando su id en staff_id) para esa fecha, y usa el primer profesional cuya disponibilidad incluya el horario que el cliente quiere. Al llamar book_appointment, usa ese mismo staff_id (no lo dejes en blanco), para que la cita quede asignada a un profesional con espacio real. Solo si ningun profesional tiene espacio en ese horario, informale al cliente y ofrece otros horarios.\n`
   }
 
   return `Eres el asistente virtual de "${org.name}", un negocio que usa MagicBee para agendar citas. Respondes por WhatsApp a clientes que quieren agendar, consultar o cancelar una cita.
