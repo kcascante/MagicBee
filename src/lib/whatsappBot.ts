@@ -1,7 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { sendAppointmentNotification } from '@/lib/appointmentEmails'
 import { sendWhatsAppImage, sendWhatsAppMessage } from '@/lib/whatsapp'
-import sharp from 'sharp'
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = 'claude-haiku-4-5-20251001'
@@ -470,6 +469,8 @@ async function toolShowServices(ctx: ToolContext) {
 
 async function makeCircularAvatar(imageUrl: string, supabase: SupabaseClient, staffId: string): Promise<string | null> {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sharpFn: any = (await import('sharp')).default
     const res = await fetch(imageUrl)
     if (!res.ok) return null
     const buffer = Buffer.from(await res.arrayBuffer())
@@ -477,7 +478,7 @@ async function makeCircularAvatar(imageUrl: string, supabase: SupabaseClient, st
     const circleMask = Buffer.from(
       `<svg width="${size}" height="${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="white"/></svg>`
     )
-    const circular = await sharp(buffer)
+    const circular = await sharpFn(buffer)
       .resize(size, size, { fit: 'cover', position: 'center' })
       .composite([{ input: circleMask, blend: 'dest-in' }])
       .png()
