@@ -269,6 +269,7 @@ async function toolBookAppointment(ctx: ToolContext, input: any) {
     .insert({
       organization_id: ctx.org.id,
       client_id: client.id,
+      client_name: cleanName || client.full_name,
       service_id: service.id,
       staff_id: null,
       start_time: startISO,
