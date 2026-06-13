@@ -190,7 +190,7 @@ export default function AppointmentsClient({
     const { data } = await supabase
       .from('appointments')
       .select(`
-        id, start_time, end_time, status, notes, booked_via,
+        id, start_time, end_time, status, notes, booked_via, client_name,
         client_id, service_id, staff_id,
         clients(full_name, phone, email),
         services(name, duration_minutes, price),
@@ -216,7 +216,7 @@ export default function AppointmentsClient({
     const { data } = await supabase
       .from('appointments')
       .select(`
-        id, start_time, end_time, status, notes, booked_via,
+        id, start_time, end_time, status, notes, booked_via, client_name,
         client_id, service_id, staff_id,
         clients(full_name, phone, email),
         services(name, duration_minutes, price),
@@ -369,7 +369,7 @@ export default function AppointmentsClient({
       .update({ status })
       .eq('id', id)
       .select(`
-        id, start_time, end_time, status, notes, booked_via,
+        id, start_time, end_time, status, notes, booked_via, client_name,
         client_id, service_id, staff_id,
         clients(full_name, phone, email),
         services(name, duration_minutes, price),
@@ -954,7 +954,7 @@ function NewAppointmentModal({
         booked_via: 'admin',
       })
       .select(`
-        id, start_time, end_time, status, notes, booked_via,
+        id, start_time, end_time, status, notes, booked_via, client_name,
         client_id, service_id, staff_id,
         clients(full_name, phone, email),
         services(name, duration_minutes, price),
