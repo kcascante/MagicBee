@@ -435,7 +435,7 @@ export default function AppointmentsClient({
                 <span className="apt-list-time-end">{fmtTime(appt.end_time, timezone)}</span>
               </div>
               <div className="apt-list-info">
-                <span className="apt-list-name">{appt.clients?.full_name ?? 'Cliente'}</span>
+                <span className="apt-list-name">{appt.client_name || appt.clients?.full_name || 'Cliente'}</span>
                 <span className="apt-list-service">
                   {appt.services?.name}{appt.staff ? ` \u00b7 ${appt.staff.full_name}` : ''}
                 </span>
@@ -507,7 +507,7 @@ export default function AppointmentsClient({
                       onClick={() => setSelectedAppt(appt)}
                     >
                       <span className="apt-block-time">{fmtTime(appt.start_time, timezone)}</span>
-                      <span className="apt-block-name">{appt.clients?.full_name ?? 'Cliente'}</span>
+                      <span className="apt-block-name">{appt.client_name || appt.clients?.full_name || 'Cliente'}</span>
                       <span className="apt-block-service">{appt.services?.name}{appt.staff ? ` \u00b7 ${appt.staff.full_name}` : ''}</span>
                     </button>
                   )
@@ -731,7 +731,7 @@ function AppointmentDetailModal({
         style={{ margin: '0 auto', maxHeight: 'none' }}
       >
         <div className="apt-detail-header">
-          <h2 className="auth-card-title" style={{ marginBottom: 4 }}>{appt.clients?.full_name ?? 'Cliente'}</h2>
+          <h2 className="auth-card-title" style={{ marginBottom: 4 }}>{appt.client_name || appt.clients?.full_name || 'Cliente'}</h2>
           <span className="svc-badge" style={{ color: STATUS_COLORS[appt.status], background: STATUS_COLORS[appt.status] + '22', border: `1px solid ${STATUS_COLORS[appt.status]}55` }}>
             {STATUS_LABELS[appt.status] ?? appt.status}
           </span>
