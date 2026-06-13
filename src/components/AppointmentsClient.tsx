@@ -83,7 +83,6 @@ export default function AppointmentsClient({
   initialAppointments,
   services,
   staff,
-  supabase,
 }: AppointmentsClientProps) {
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments)
   const [view, setView] = useState<View>('week')
@@ -127,7 +126,7 @@ export default function AppointmentsClient({
   }, [])
 
   const updateAppointmentStatus = async (appointmentId: string, status: string) => {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('appointments')
       .update({ status })
       .eq('id', appointmentId)
