@@ -85,7 +85,7 @@ export async function POST(req: Request) {
       .is('staff_id', null)
     const { data: staff } = await supabase
       .from('staff')
-      .select('id, full_name')
+      .select('id, full_name, avatar_url')
       .eq('organization_id', org.id)
       .eq('is_active', true)
       .order('full_name')
