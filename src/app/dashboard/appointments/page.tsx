@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AppointmentsClient from '@/components/AppointmentsClient'
 
+
 function getMonday(d: Date) {
   const date = new Date(d)
   const day = date.getDay()
@@ -70,7 +71,6 @@ export default async function AppointmentsPage() {
       initialWeekStart={monday.toISOString()}
       services={services ?? []}
       staff={staff ?? []}
-      supabase={supabase}
     />
   )
 }

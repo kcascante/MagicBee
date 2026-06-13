@@ -6,7 +6,12 @@ import { format, parse, startOfWeek, getDay, addDays } from 'date-fns'
 import { enUS } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import '../styles/appointments-big-calendar.css'
-import { SupabaseClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+)
 
 const locales = { 'en-US': enUS }
 const localizer = dateFnsLocalizer({
@@ -61,7 +66,6 @@ interface AppointmentsClientProps {
   initialWeekStart: string
   services: Service[]
   staff: StaffMember[]
-  supabase: SupabaseClient
 }
 
 const STATUS_COLORS: Record<string, string> = {
