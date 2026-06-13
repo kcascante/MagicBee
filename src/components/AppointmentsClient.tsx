@@ -50,6 +50,7 @@ type Appointment = {
   status: string
   notes: string | null
   booked_via: string | null
+  client_name: string | null
   client_id: string | null
   service_id: string | null
   staff_id: string | null
