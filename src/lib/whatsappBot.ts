@@ -235,21 +235,18 @@ async function toolCheckAvailability(ctx: ToolContext, input: any) {
   const service = ctx.services.find((s) => s.id === input.service_id)
   if (!service) return { error: 'service_not_found', message: 'No reconozco ese servicio.' }
 
-  // Si hay preferencia de staff o solo hay un profesional, consulta directa
-  if (input.staff_id || ctx.staff.length <= 1) {
-    const slots = await getSlotsForStaff(ctx, service.id, input.date, input.staff_id ?? null)
-    if (slots === null) return { error: 'rpc_error', message: 'Error consultando disponibilidad.' }
-    return { date: input.date, service: service.name, available_times: slots }
+  // BLOQUEO: si hay múltiples profesionales y no se eligió ninguno, forzar pregunta al cliente
+  if (!input.staff_id && ctx.staff.length > 1) {
+    return {
+      error: 'staff_required',
+      message: 'Debes preguntar al cliente su preferencia de colaborador antes de consultar horarios. Pregunta ahora y espera su respuesta.',
+      staff_names: ctx.staff.map((s) => s.full_name),
+    }
   }
 
-  // Multiples profesionales sin preferencia: unir slots de todos
-  const slotSet = new Set<string>()
-  for (const staffMember of ctx.staff) {
-    const slots = await getSlotsForStaff(ctx, service.id, input.date, staffMember.id)
-    if (slots) slots.forEach((slot) => slotSet.add(slot))
-  }
-  const available_times = Array.from(slotSet).sort()
-  return { date: input.date, service: service.name, available_times }
+  const slots = await getSlotsForStaff(ctx, service.id, input.date, input.staff_id ?? null)
+  if (slots === null) return { error: 'rpc_error', message: 'Error consultando disponibilidad.' }
+  return { date: input.date, service: service.name, available_times: slots }
 }
 
 async function findClientByPhone(ctx: ToolContext) {
