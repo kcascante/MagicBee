@@ -255,7 +255,8 @@ async function toolBookAppointment(ctx: ToolContext, input: any) {
       .single()
     if (clientError) return { error: 'client_error', message: clientError.message }
     client = newClient
-  } else if (cleanName && client.full_name !== cleanName) {
+  } else if (cleanName && client.full_name === 'Cliente de WhatsApp') {
+    // Solo actualizar nombre si aún tiene el nombre default
     await ctx.supabase.from('clients').update({ full_name: cleanName }).eq('id', client.id)
     client.full_name = cleanName
   }
