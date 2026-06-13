@@ -504,34 +504,43 @@ async function toolShowStaff(ctx: ToolContext) {
   console.log(`[whatsapp-bot] show_staff: ${ctx.staff.length} profesionales totales, ${withPhotos.length} con foto`)
 
   let sent = 0
+  const failedNames: string[] = [...withoutPhotos.map((s) => s.full_name)]
+
   for (let idx = 0; idx < withPhotos.length; idx++) {
     const s = withPhotos[idx]
     try {
       const circularUrl = await makeCircularAvatar(s.avatar_url as string, ctx.supabase, s.id)
+      if (!circularUrl) {
+        // No se pudo generar PNG circular: no enviar WebP (WhatsApp no lo soporta)
+        console.warn(`[whatsapp-bot] show_staff: sin URL circular para "${s.full_name}", se incluirá en texto`)
+        failedNames.push(s.full_name)
+        continue
+      }
       await sendWhatsAppImage(
         ctx.whatsappPhoneNumberId,
         ctx.whatsappAccessToken,
         ctx.fromPhone,
-        circularUrl ?? (s.avatar_url as string),
+        circularUrl,
         s.full_name
       )
       sent++
     } catch (err: any) {
       console.error(`[whatsapp-bot] show_staff image send failed for "${s.full_name}":`, err?.message ?? err)
+      failedNames.push(s.full_name)
     }
     if (idx < withPhotos.length - 1) {
       await new Promise((r) => setTimeout(r, 400))
     }
   }
 
-  if (withoutPhotos.length > 0) {
-    const lines = withoutPhotos.map((s) => `• ${s.full_name}`).join('\n')
+  if (failedNames.length > 0) {
+    const lines = failedNames.map((name) => `• ${name}`).join('\n')
     try {
       await sendWhatsAppMessage(
         ctx.whatsappPhoneNumberId,
         ctx.whatsappAccessToken,
         ctx.fromPhone,
-        `También está disponible:\n${lines}`
+        `También tenemos disponible:\n${lines}`
       )
     } catch (err) {
       console.error('[whatsapp-bot] show_staff text send failed', err)
