@@ -70,6 +70,7 @@ export default async function AppointmentsPage() {
       initialWeekStart={monday.toISOString()}
       services={services ?? []}
       staff={staff ?? []}
+      supabase={supabase}
     />
   )
 }

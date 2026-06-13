@@ -69,6 +69,24 @@ function todayInTimezone(timezone: string): string {
   return `${get('year')}-${get('month')}-${get('day')}`
 }
 
+// Converts local wall-clock time to UTC ISO using date-fns-tz
+// Correctly handles DST automatically based on the date
+import { toDate } from 'date-fns-tz'
+
+function zonedTimeToUtc(dateStr: string, timeStr: string, timeZone: string): string {
+  // dateStr: "2026-06-15", timeStr: "15:00"
+  const [year, month, day] = dateStr.split('-').map(Number)
+  const [hours, minutes] = timeStr.split(':').map(Number)
+  
+  // Create a date string in the format expected by toDate
+  const wallClockString = `${dateStr}T${timeStr}:00`
+  
+  // toDate converts a wall-clock time string in a given timezone to UTC
+  const utcDate = toDate(wallClockString, { timeZone })
+  
+  return utcDate.toISOString()
+}
+
 function normalizePhone(phone: string): string {
   const digits = phone.replace(/\D/g, '')
   return digits.slice(-8) // ultimos 8 digitos (numeros de Costa Rica)
@@ -242,7 +260,7 @@ async function toolBookAppointment(ctx: ToolContext, input: any) {
     client.full_name = cleanName
   }
 
-  const startISO = new Date(`${input.date}T${input.time}:00`).toISOString()
+  const startISO = zonedTimeToUtc(input.date, input.time, ctx.org.timezone || 'America/Costa_Rica')
   const endISO = new Date(new Date(startISO).getTime() + service.duration_minutes * 60000).toISOString()
 
   const { data: appt, error: apptError } = await ctx.supabase
