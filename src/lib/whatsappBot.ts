@@ -509,10 +509,12 @@ async function toolShowStaff(ctx: ToolContext) {
   for (let idx = 0; idx < withPhotos.length; idx++) {
     const s = withPhotos[idx]
     try {
+      // Intentar versión circular primero; si falla, enviar imagen original (debe ser JPEG/PNG)
       const circularUrl = await makeCircularAvatar(s.avatar_url as string, ctx.supabase, s.id)
-      if (!circularUrl) {
-        // No se pudo generar PNG circular: no enviar WebP (WhatsApp no lo soporta)
-        console.warn(`[whatsapp-bot] show_staff: sin URL circular para "${s.full_name}", se incluirá en texto`)
+      const imageUrl = circularUrl ?? s.avatar_url as string
+      const isWebp = imageUrl.toLowerCase().includes('.webp') || imageUrl.toLowerCase().includes('webp')
+      if (!circularUrl && isWebp) {
+        console.warn(`[whatsapp-bot] show_staff: imagen WebP sin circular para "${s.full_name}", se incluirá en texto`)
         failedNames.push(s.full_name)
         continue
       }
@@ -520,7 +522,7 @@ async function toolShowStaff(ctx: ToolContext) {
         ctx.whatsappPhoneNumberId,
         ctx.whatsappAccessToken,
         ctx.fromPhone,
-        circularUrl,
+        imageUrl,
         s.full_name
       )
       sent++
