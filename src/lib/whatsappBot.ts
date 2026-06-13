@@ -28,10 +28,6 @@ type Staff = {
   id: string
   full_name: string
 }
-type Staff = {
-  id: string
-  full_name: string
-}
 
 const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 
