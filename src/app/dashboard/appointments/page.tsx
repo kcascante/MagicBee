@@ -36,7 +36,7 @@ export default async function AppointmentsPage() {
   const { data: appointments } = await supabase
     .from('appointments')
     .select(`
-      id, start_time, end_time, status, notes, booked_via,
+      id, start_time, end_time, status, notes, booked_via, client_name,
       client_id, service_id, staff_id,
       clients(full_name, phone, email),
       services(name, duration_minutes, price),
